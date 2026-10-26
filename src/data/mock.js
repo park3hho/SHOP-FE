@@ -1,4 +1,5 @@
 // 디자인 시안용 예시 데이터 (AGC 상품 사진·이름, 가격은 네이버가 -5% 예시)
+// best[].stage: 실제 패키지 사진을 넣어 배경만 연출한 컷 (playbook shop-design-system §5 B)
 export default {
  "tea": [
   {
@@ -95,7 +96,8 @@ export default {
    "img": "https://api.eidofood.com/files/photos/2026/10/80018ffd91bd416b95ddfbf502ae44c2.jpg",
    "price": 15300,
    "off": 11,
-   "brand": "북빙양"
+   "brand": "북빙양",
+   "stage": "/img/stage/PR-261020-0007.jpg"
   },
   {
    "code": "PR-261019-0001",
@@ -104,7 +106,8 @@ export default {
    "img": "https://api.eidofood.com/files/photos/2026/10/388deb1de30e47f182ca72cfe3bd8f0b.jpg",
    "price": 25900,
    "off": 10,
-   "brand": "농부산천"
+   "brand": "농부산천",
+   "stage": "/img/stage/PR-261019-0001.jpg"
   },
   {
    "code": "PR-261024-0012",
@@ -113,7 +116,8 @@ export default {
    "img": "https://api.eidofood.com/files/photos/2026/10/6f36dffcab9d40d3919b80315230244c.jpg",
    "price": 17600,
    "off": 10,
-   "brand": "훙바오라이"
+   "brand": "훙바오라이",
+   "stage": "/img/stage/PR-261024-0012.jpg"
   },
   {
    "code": "PR-261019-0007",
@@ -122,7 +126,8 @@ export default {
    "img": "https://api.eidofood.com/files/photos/2026/10/ecc96e62273a4f4eba57104f58af52f2.jpg",
    "price": 26800,
    "off": 10,
-   "brand": "통일"
+   "brand": "통일",
+   "stage": "/img/stage/PR-261019-0007.jpg"
   },
   {
    "code": "PR-261025-0009",
@@ -131,7 +136,8 @@ export default {
    "img": "https://api.eidofood.com/files/photos/2026/10/5cc784508ab4495284c915f8a18ae095.jpg",
    "price": 17200,
    "off": 10,
-   "brand": "탕천목장"
+   "brand": "탕천목장",
+   "stage": "/img/stage/PR-261025-0009.jpg"
   },
   {
    "code": "PR-261024-002C",
@@ -140,7 +146,8 @@ export default {
    "img": "https://api.eidofood.com/files/photos/2026/10/9a819c432a6947749d0e036d2acc3147.jpg",
    "price": 22700,
    "off": 10,
-   "brand": "산토리"
+   "brand": "산토리",
+   "stage": "/img/stage/PR-261024-002C.jpg"
   },
   {
    "code": "PR-261020-0003",
@@ -149,7 +156,8 @@ export default {
    "img": "https://api.eidofood.com/files/photos/2026/10/e7daee19dc3a48469ec2ce164430116a.jpg",
    "price": 22800,
    "off": 10,
-   "brand": "왕왕"
+   "brand": "왕왕",
+   "stage": "/img/stage/PR-261020-0003.jpg"
   },
   {
    "code": "PR-261025-0029",
@@ -158,7 +166,8 @@ export default {
    "img": "https://api.eidofood.com/files/photos/2026/10/1973ee644c4a4182aa665f7032a698f0.jpg",
    "price": 16300,
    "off": 10,
-   "brand": "싼치"
+   "brand": "싼치",
+   "stage": "/img/stage/PR-261025-0029.jpg"
   }
  ],
  "milktea": [
