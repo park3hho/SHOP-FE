@@ -10,7 +10,7 @@
 | 금액 위조 막기 (서버 계산 · 승인 응답 검사 · 다르면 자동 전체 취소) | ✅ |
 | FE → 서버 주소 | ✅ `vercel.json` `/api/shop/*` → 서버 · 개발은 `vite.config.js` proxy (포트 5175) |
 | FE 함수 | ✅ `src/lib/payments.js` — **화면은 이 함수만 부르면 된다** |
-| 테스트 키 | ⏳ 카카오페이 Secret key(dev) · 네이버페이 개발 인증값 — 서버 `.env` 에 넣으면 `getPayConfig()` 의 `enabled` 가 true |
+| 테스트 키 | ✅ 2026-10-27 — 카카오페이 앱 "이도식품 자사몰"(Secret key dev, 웹 도메인 www.eidofood.com · eidofood.com · eido-shop.vercel.app · localhost:5175) · 네이버페이 샌드박스 인증값. 서버 `.env` 에만 있음 → `getPayConfig()` 둘 다 `enabled: true` |
 | 실제 결제 (가맹) | ⏳ 나중에 — 사업자 · 통신판매업 · 약관/환불정책 페이지 필요 |
 
 ## 1. FE 가 만들 화면 (5개)
