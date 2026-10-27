@@ -58,7 +58,7 @@ button { font: inherit; background: none; border: 0; padding: 0; cursor: pointer
 .card-img.has-stage .real { position: absolute; inset: 0; opacity: 0; object-fit: contain; background: #fff; }
 .card:hover .card-img.has-stage .real { opacity: 1; }
 .card:hover .card-img.has-stage .staged { opacity: 0; }
-.staged { position: absolute; right: 8px; bottom: 8px; z-index: 2; font-size: 10px; color: #fff; background: rgba(0,0,0,.35); padding: 2px 6px; letter-spacing: -0.01em; pointer-events: none; transition: opacity .3s; }
+.staged { position: absolute; right: 8px; bottom: 8px; z-index: 2; font-size: 10px; color: rgba(255,255,255,.9); text-shadow: 0 0 3px rgba(0,0,0,.35); letter-spacing: -0.01em; pointer-events: none; transition: opacity .3s; }
 .best-head .best-note { flex: 1; margin-left: 16px; font-size: 12px; color: var(--mute); }
 .card:hover .card-img img { transform: scale(1.03); }
 .rank { position: absolute; left: 0; top: 0; background: #000; color: #fff; font-size: 13px; font-weight: 700; padding: 4px 9px; }
