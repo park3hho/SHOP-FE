@@ -86,20 +86,25 @@ export default function App() {
           <a>전체보기</a>
         </div>
         <div className="best-grid">
-          {data.best.map((p, i) => (
+          {data.best.map((p, i) => {
+            // p.stage = 대표이미지(연출) · p.hover = 대표이미지(전환용, 없으면 실물 p.img 로 전환)
+            // AGC 에 저장된 연출컷(api.eidofood.com/files/...)은 '연출 이미지' 글씨가 파일에 들어 있어 글씨를 또 얹지 않는다
+            const burned = p.stage && !p.stage.startsWith('/img/')
+            return (
             <a className="card" href="#" key={p.code}>
               <div className={`card-img${p.stage ? ' has-stage' : ''}`}>
                 {p.stage && <img className="stage" src={p.stage} alt="" loading="lazy" />}
-                <img className="real" src={p.img} alt="" loading="lazy" />
+                <img className="real" src={(p.stage && p.hover) || p.img} alt="" loading="lazy" />
                 <span className="rank">{i + 1}</span>
-                {p.stage && <span className="staged">연출 이미지</span>}
+                {p.stage && !burned && <span className="staged">연출 이미지</span>}
               </div>
               <div className="brand">{p.brand}</div>
               <div className="name">{p.name}</div>
               <div className="cn">{p.cn}</div>
               <div className="price"><em>{p.off}%</em>{won(p.price)}</div>
             </a>
-          ))}
+            )
+          })}
         </div>
       </section>
 
