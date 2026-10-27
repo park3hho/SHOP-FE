@@ -4,7 +4,8 @@
 
 - 개발: `npm install` → `npm run dev`
 - 빌드: `npm run build`
-- API: 나중에 `vercel.json` rewrite 로 `/api/*` → `https://api.eidofood.com/...` 연결 예정
+- API: `/api/shop/*` → `https://api.eidofood.com/shop/*` (`vercel.json` rewrite · 개발은 vite proxy, 포트 5175)
+- 결제(카카오페이 · 네이버페이): `src/lib/payments.js` + 설명서 `docs/payments.md`
 
 ## 디자인 규칙
 

@@ -1,5 +1,6 @@
 {
   "rewrites": [
+    { "source": "/api/shop/:path*", "destination": "https://api.eidofood.com/shop/:path*" },
     { "source": "/(.*)", "destination": "/index.html" }
   ]
 }
