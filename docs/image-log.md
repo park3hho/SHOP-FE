@@ -5,14 +5,16 @@
 
 ## A. 분위기 연출컷 (`public/img/*.jpg`)
 
+공통 문장: `Editorial lifestyle product photography for a minimalist Korean select-shop website (like 29CM). Natural light, muted film tones, generous negative space, no text, no logos, no readable labels.`
+
 | 파일 | 프롬프트(장면 부분) |
 | --- | --- |
-| soda.jpg |  |
-| tea.jpg |  |
-| fridge.jpg |  |
-| lychee.jpg |  |
-| milktea.jpg |  |
-| lychee-glass.jpg |  |
+| soda.jpg | Vertical portrait composition. Several retro glass bottles of orange soda with condensation on a worn stainless-steel counter of a small Beijing hutong corner shop, warm late-afternoon sunlight and long shadows, grey brick wall behind. |
+| tea.jpg | Landscape composition. Clear PET bottles of pale green jasmine tea lying on light oak wood beside a few fresh white jasmine flowers, soft morning daylight, calm and clean. |
+| fridge.jpg | Landscape composition. Inside an open convenience-store glass fridge, neat rows of colorful juice and milk tea bottles and cans, cool white light, slight cold mist, shot straight on, shallow depth of field. |
+| lychee.jpg | Vertical portrait composition. A hand holding a cold aluminium can of lychee sparkling drink against a pale pink plastered wall, bright summer daylight, playful but minimal. |
+| milktea.jpg | Landscape composition. Three plastic bottles of creamy milk tea and one paper cup of Hong Kong style milk tea on a small round marble cafe table by a window, soft afternoon light, cozy and calm. |
+| lychee-glass.jpg | Landscape composition. Two tall glasses of pale pink lychee sparkling soda with ice cubes and fresh peeled lychees on a light pink tabletop, bright summer daylight, crisp bubbles. (기획전 대표 사진 전용 — 원재료 확인 전이라 특정 상품 옆 단독 사용 금지, playbook §6.2) |
 
 ## B. 상품 연출컷 (`public/img/stage/{제품코드}.jpg`)
 
