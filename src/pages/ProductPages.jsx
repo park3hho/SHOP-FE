@@ -63,7 +63,17 @@ export function ProductListPage({ query }) {
         </nav>
       )}
       {error && <p className="error">{error}</p>}
-      {data && !data.items.length && <p className="empty">찾는 상품이 없어요.</p>}
+      {data && !data.items.length && (
+        <p className="empty">
+          {cat === 'tea' && !q ? '찻잎·티백은 곧 들어와요. 지금은 병에 담긴 차음료를 만나 보세요.' : '찾는 상품이 없어요.'}
+          {cat === 'tea' && !q && (
+            <>
+              {' '}
+              <Link to="/products?cat=beverage&sub=tea">차음료 보기</Link>
+            </>
+          )}
+        </p>
+      )}
       <div className="grid">
         {(data?.items || []).map((p) => (
           <Link className="card" key={p.code} to={`/products/${p.code}`}>

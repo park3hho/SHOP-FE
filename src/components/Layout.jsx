@@ -4,8 +4,8 @@ import { useCategories, useMember } from '../lib/api'
 import { useCart } from '../lib/cart'
 import { Link, navigate, useLocation } from '../lib/router'
 
-// 서버 응답 전 잠깐 보이는 메뉴 (자리 흔들림 방지) — 음료 소분류만
-const FALLBACK = [{ code: 'beverage', sub: [['soda', '탄산'], ['juice', '주스'], ['tea', '차음료'], ['milktea', '밀크티'], ['coffee', '커피'], ['milk', '우유·두유'], ['functional', '이온·기능성']].map(([code, label]) => ({ code, label })) }]
+// 서버 응답 전 잠깐 보이는 메뉴 (자리 흔들림 방지) — Drink(소분류) | Tea
+const FALLBACK = [{ code: 'beverage', en: 'Drink', sub: [['soda', '탄산'], ['juice', '주스'], ['tea', '차음료'], ['milktea', '밀크티'], ['coffee', '커피'], ['milk', '우유·두유'], ['functional', '이온·기능성']].map(([code, label]) => ({ code, label })) }, { code: 'tea', en: 'Tea', sub: [] }]
 
 // 공통 머리 — 로고 · 메뉴 · 검색 · 로그인/마이페이지 · 장바구니(개수)
 export function Header() {
@@ -38,7 +38,8 @@ export function Header() {
             </Link>
           </div>
           <div className="gnb-sub">
-            {/* 분류 메뉴 — AGC 제품 분류 (GET /categories, 파는 상품이 있는 것만). 대분류가 둘 이상이면 Drink | Tea 로 나눈다 */}
+            {/* 분류 메뉴 — AGC 제품 분류 (GET /categories). Drink | Tea 로 나누고, 소분류는 파는 상품이 있는 것만.
+                Tea(찻잎·티백)는 곧 들어와서 미리 자리를 만들어 둠 (2026-10-29) */}
             {(cats || FALLBACK).map((c, i, all) => (
               <Fragment key={c.code}>
                 {i > 0 && <span className="bar" />}
