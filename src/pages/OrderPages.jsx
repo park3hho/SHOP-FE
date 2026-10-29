@@ -112,11 +112,24 @@ const openPostcode = (onPick) => {
     }
     document.head.appendChild(s)
   })
-  return postcodeLoading.then(() =>
+  // 새 창 대신 화면 위 레이어로 (모바일 · 팝업 차단에서도 동작)
+  return postcodeLoading.then(() => {
+    const layer = document.createElement('div')
+    layer.className = 'postcode-layer'
+    layer.innerHTML = '<div class="postcode-box"><button type="button" class="postcode-close">닫기</button><div class="postcode-body"></div></div>'
+    const close = () => layer.remove()
+    layer.querySelector('.postcode-close').onclick = close
+    layer.onclick = (e) => e.target === layer && close()
+    document.body.appendChild(layer)
     new window.daum.Postcode({
-      oncomplete: (d) => onPick({ zip: d.zonecode, addr1: d.roadAddress || d.jibunAddress }),
-    }).open(),
-  )
+      oncomplete: (d) => {
+        onPick({ zip: d.zonecode, addr1: d.roadAddress || d.jibunAddress })
+        close()
+      },
+      width: '100%',
+      height: '100%',
+    }).embed(layer.querySelector('.postcode-body'))
+  })
 }
 
 export function AddressFields({ value, onChange }) {

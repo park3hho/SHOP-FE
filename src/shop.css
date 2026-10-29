@@ -183,3 +183,10 @@
   .line img { width: 72px; height: 72px; }
   .line-price { grid-column: 2 / -1; justify-items: start; grid-auto-flow: column; justify-content: space-between; }
 }
+
+.line-body .qty { justify-self: start; }
+input[type='checkbox'] { accent-color: #000; }
+.postcode-layer { position: fixed; inset: 0; z-index: 100; background: rgba(0,0,0,.4); display: grid; place-items: center; }
+.postcode-box { position: relative; width: min(500px, 94vw); height: min(560px, 86vh); background: #fff; padding-top: 44px; }
+.postcode-body { width: 100%; height: 100%; }
+.postcode-close { position: absolute; top: 10px; right: 14px; font-size: 14px; text-decoration: underline; }
