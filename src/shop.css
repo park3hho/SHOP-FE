@@ -100,9 +100,10 @@
 .tabs button { padding: 14px 0; font-size: 16px; font-weight: 600; color: var(--sub); border-bottom: 2px solid transparent; margin-bottom: -1px; }
 .tabs button.on { color: var(--ink); border-bottom-color: var(--ink); }
 /* 상세 이미지 — 흰 칸이 많은 이미지라 페이지 흰 바탕과 경계가 안 보였다 → 옅은 회색 띠 위에 1px 선으로 올린다 */
-.pd-detail { max-width: 908px; margin: 0 auto; padding: 24px; background: var(--bg-sub); }
+/* 폭 = 이미지 860 + 스크롤바 8 + 선 2 + 양옆 띠 24×2 — 이미지는 원래 860px 그대로 (칸 안 스크롤바·선 때문에 848px 로 줄었던 것 복구) */
+.pd-detail { max-width: 918px; margin: 0 auto; padding: 24px; background: var(--bg-sub); }
 /* 정해진 높이 안에서만 스크롤 (창 높이의 80%) — 맨 아래까지 내려도 페이지는 그대로라 위로 돌아오기 쉽다 */
-.pd-detail-scroll { position: relative; max-height: 80vh; overflow-y: auto; border: 1px solid var(--line); background: #fff; }
+.pd-detail-scroll { position: relative; max-height: 80vh; overflow-y: auto; scrollbar-gutter: stable; border: 1px solid var(--line); background: #fff; }
 .pd-detail-scroll img { display: block; width: 100%; }
 .pd-detail-top { position: sticky; bottom: 12px; display: block; margin: -44px 12px 12px auto; height: 32px; padding: 0 14px; border: 1px solid var(--ink); background: #fff; font: 600 13px var(--font); cursor: pointer; }
 .pd-detail .empty { margin: 0; text-align: center; }
