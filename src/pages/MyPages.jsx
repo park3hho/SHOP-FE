@@ -37,7 +37,14 @@ const MENU = [
     ],
   },
 ]
-const STEPS = ['ordered', 'preparing', 'shipping', 'delivered']
+// 마이페이지 첫 화면 숫자 — 배송 단계(delivery.level 0~7)를 4칸으로 묶는다
+const HOME_STEPS = [
+  { label: '결제 완료', has: (l) => l === 0 },
+  { label: '주문 확인', has: (l) => l === 1 },
+  { label: '배송 중', has: (l) => l >= 2 && l <= 6 },
+  { label: '배송 완료', has: (l) => l === 7 },
+]
+const stateLabel = (o) => (o.progress === 'cancelled' || !o.delivery ? PROGRESS[o.progress] : o.delivery.label)
 
 // 마이페이지 틀 — 왼쪽 메뉴 + 오른쪽 내용. 로그인 안 했으면 로그인으로
 function MyLayout({ path, title, children }) {
@@ -106,7 +113,7 @@ function OrderRow({ o }) {
           {won(o.total_amount)} · {o.quantity}개
         </div>
       </div>
-      <div className={`order-state st-${o.progress}`}>{PROGRESS[o.progress]}</div>
+      <div className={`order-state st-${o.progress}`}>{stateLabel(o)}</div>
     </Link>
   )
 }
@@ -114,14 +121,14 @@ function OrderRow({ o }) {
 // /my — 진행 상태 숫자 + 최근 주문
 export function MyHomePage() {
   const { items, error } = useOrders()
-  const count = (s) => (items || []).filter((o) => o.progress === s).length
+  const count = (s) => (items || []).filter((o) => o.progress !== 'cancelled' && o.delivery && s.has(o.delivery.level)).length
   return (
     <MyLayout path="/my">
       <div className="my-steps">
-        {STEPS.map((s) => (
-          <div key={s}>
+        {HOME_STEPS.map((s) => (
+          <div key={s.label}>
             <b>{count(s)}</b>
-            <span>{PROGRESS[s]}</span>
+            <span>{s.label}</span>
           </div>
         ))}
       </div>
@@ -176,7 +183,6 @@ export function MyOrderPage({ code }) {
       .then(setO)
       .catch((e) => setError(e.message))
   }, [code])
-  const stepIdx = o ? STEPS.indexOf(o.progress) : -1
   return (
     <MyLayout path="/my/orders" title="주문 상세">
       {error && <p className="error">{error}</p>}
@@ -189,18 +195,7 @@ export function MyOrderPage({ code }) {
           {o.progress === 'cancelled' ? (
             <p className="cancel-note">주문이 취소됐어요 ({kst(o.cancelled_at)}) — 결제 금액은 결제수단으로 돌려드렸어요.</p>
           ) : (
-            <ol className="steps">
-              {STEPS.map((s, i) => (
-                <li key={s} className={i <= stepIdx ? 'on' : ''}>
-                  {PROGRESS[s]}
-                </li>
-              ))}
-            </ol>
-          )}
-          {o.tracking?.number && (
-            <p>
-              송장 {o.tracking.courier} {o.tracking.number}
-            </p>
+            o.delivery && <DeliverySteps d={o.delivery} />
           )}
           <h2 className="sub-title">주문 상품</h2>
           {o.items.map((it) => (
@@ -598,5 +593,39 @@ function MyPasswordChange() {
         <button className="btn-black">변경</button>
       </form>
     </MyLayout>
+  )
+}
+
+
+// 배송 단계 — 결제 완료부터 배송 완료까지 세로 타임라인 (지난 단계는 시각, 지금 단계는 굵게)
+function DeliverySteps({ d }) {
+  return (
+    <>
+      <p className="delivery-now">
+        지금 <b>{d.label}</b>
+      </p>
+      <ol className="track">
+        {d.steps.map((s) => (
+          <li key={s.key} className={s.current ? 'now' : s.done ? 'on' : ''}>
+            <span className="dot" />
+            <span className="label">{s.label}</span>
+            {s.at && <span className="muted small">{kst(s.at)}</span>}
+            {s.key === 'domestic' && s.done && d.domestic && (
+              <span className="small">
+                {d.domestic.courier} {d.domestic.number}
+                {d.domestic.url && (
+                  <>
+                    {' '}
+                    <a href={d.domestic.url} target="_blank" rel="noreferrer">
+                      배송 조회
+                    </a>
+                  </>
+                )}
+              </span>
+            )}
+          </li>
+        ))}
+      </ol>
+    </>
   )
 }
