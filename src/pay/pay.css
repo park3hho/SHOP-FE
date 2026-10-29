@@ -1,0 +1,22 @@
+/* 결제 화면 (/pay/…) — 홈과 같은 토큰(styles.css :root), 상자 없이 선으로 */
+.pay { max-width: 440px; margin: 0 auto; padding: 48px 24px 64px; }
+.pay-logo { display: inline-block; font-weight: 800; font-size: 18px; letter-spacing: 0.06em; margin-bottom: 40px; }
+.pay h1 { margin: 0 0 8px; font-size: 24px; font-weight: 700; letter-spacing: -0.03em; }
+.pay-sub { margin: 0 0 24px; font-size: 14px; color: var(--sub); }
+.pay-qty { display: flex; align-items: center; justify-content: space-between; padding: 14px 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); font-size: 15px; font-weight: 600; }
+.pay-qty select { font: inherit; font-weight: 500; padding: 6px 8px; border: 1px solid var(--line); background: #fff; }
+.pay-buttons { display: grid; gap: 8px; margin-top: 24px; }
+.pay-btn { height: 52px; font-size: 16px; font-weight: 700; }
+.pay-btn:disabled { opacity: 0.4; cursor: default; }
+.pay-btn.kakao { background: #fee500; color: #191919; }
+.pay-btn.naver { background: #03c75a; color: #fff; }
+.pay-note { margin: 12px 0 0; font-size: 13px; color: var(--mute); }
+.pay-error { margin: 16px 0 0; font-size: 14px; color: #d4380d; }
+.pay-order { display: grid; grid-template-columns: 64px 1fr; margin: 24px 0 0; border-top: 1px solid var(--line); font-size: 15px; }
+.pay-order dt, .pay-order dd { margin: 0; padding: 12px 0; border-bottom: 1px solid var(--line); }
+.pay-order dt { color: var(--sub); }
+.st-paid { color: #0a7a3e; font-weight: 700; }
+.st-failed, .st-cancelled { color: var(--sub); }
+.pay-links { display: flex; flex-wrap: wrap; gap: 20px; margin-top: 28px; font-size: 14px; }
+.pay-link { color: var(--ink); text-decoration: underline; text-underline-offset: 3px; }
+.pay-link:disabled { color: var(--mute); }
