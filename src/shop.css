@@ -267,3 +267,40 @@ input[type='checkbox'] { accent-color: #000; }
 .track li.now { color: var(--ink); font-weight: 700; }
 .track li.now .dot { background: var(--ink); border-color: var(--ink); box-shadow: 0 0 0 4px rgba(0, 0, 0, 0.08); }
 .track .label { min-width: 160px; }
+
+/* 주문 완료 (2026-10-29) — 완료 표시 · 배송 진행(8칸 막대) · 주문 상품 · 결제/배송지 2단 */
+.od { padding: 48px 0 24px; }
+.od-head { text-align: center; padding-bottom: 36px; border-bottom: 1px solid var(--ink); }
+.od-mark { display: inline-flex; align-items: center; justify-content: center; width: 56px; height: 56px; border-radius: 50%; background: var(--ink); color: #fff; font-size: 24px; font-weight: 700; }
+.od-mark.wait { background: #fff; color: var(--ink); border: 1px solid var(--ink); }
+.od-eyebrow { margin: 20px 0 6px; font-size: 11px; letter-spacing: 0.18em; color: var(--sub); }
+.od-head h1 { margin: 0 0 10px; font-size: 26px; }
+.od-head > .muted { margin: 0; font-size: 14px; }
+.od-code { display: inline-flex; gap: 8px; align-items: baseline; margin-top: 20px; padding: 10px 16px; background: var(--bg-sub); border: 0; font-size: 13px; cursor: pointer; }
+.od-code b { font-size: 14px; letter-spacing: 0.02em; }
+.od-code .muted { font-size: 12px; text-decoration: underline; }
+.od-test { margin: 12px 0 0; font-size: 12px; color: var(--accent); }
+.od-sec { padding: 28px 0; border-bottom: 1px solid var(--line); }
+.od-sec h2 { margin: 0; font-size: 15px; }
+.od-sec-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 16px; }
+.od-bar { display: grid; grid-template-columns: repeat(8, 1fr); gap: 3px; }
+.od-bar span { height: 4px; background: var(--line); }
+.od-bar span.on { background: var(--ink); }
+.od-now { display: flex; justify-content: space-between; align-items: baseline; margin: 14px 0 4px; font-size: 16px; }
+.od-sec > p.small { margin: 0; }
+.od-items { list-style: none; margin: 0; padding: 0; display: grid; gap: 14px; }
+.od-items li { display: grid; grid-template-columns: 64px 1fr auto; gap: 14px; align-items: center; }
+.od-items img, .od-noimg { width: 64px; height: 64px; object-fit: cover; background: var(--bg-sub); display: block; }
+.od-items p { margin: 0 0 4px; font-size: 14px; }
+.od-items b { font-size: 14px; }
+.od-two { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; }
+.od-two h2 { margin-bottom: 12px; }
+.od-kv { display: grid; grid-template-columns: 72px 1fr; gap: 8px 12px; margin: 0; font-size: 13px; }
+.od-kv dt { color: var(--sub); }
+.od-kv dd { margin: 0; word-break: keep-all; }
+.od-kv .od-total { padding-top: 8px; border-top: 1px solid var(--line); font-weight: 700; color: var(--ink); font-size: 14px; }
+.od-links { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 32px; }
+@media (max-width: 560px) {
+  .od { padding-top: 32px; }
+  .od-two { grid-template-columns: 1fr; gap: 24px; }
+}

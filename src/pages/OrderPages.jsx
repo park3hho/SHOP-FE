@@ -1,9 +1,9 @@
 import { useEffect, useMemo, useState } from 'react'
 
 import { Page } from '../components/Layout'
-import { getProfile, listAddresses, myOrder, PAY_METHOD, PROGRESS, useMember, won } from '../lib/api'
+import { getProfile, kst, listAddresses, myOrder, PAY_METHOD, PROGRESS, useMember, won } from '../lib/api'
 import { clearCart, getBuyNow, removeFromCart, setBuyNow, setQty, useCart } from '../lib/cart'
-import { createOrder, getPayConfig, payWithKakao, payWithNaver } from '../lib/payments'
+import { createOrder, getOrder, getPayConfig, payWithKakao, payWithNaver } from '../lib/payments'
 import { Link, navigate } from '../lib/router'
 import { Qty } from './ProductPages'
 
@@ -372,38 +372,160 @@ export function OrderCompletePage({ query }) {
       }
     }
     sessionStorage.removeItem('shop.checkoutFrom')
-    myOrder(code)
+    // 주문한 브라우저(token) 먼저, 안 되면 회원 주문으로 — 비회원 · 시험 상품 주문도 보이게
+    getOrder(code)
+      .catch(() => myOrder(code))
       .then(setO)
       .catch((e) => setError(e.message))
   }, [code])
+  if (error)
+    return (
+      <Page narrow>
+        <div className="done">
+          <h1>주문을 찾지 못했어요</h1>
+          <p className="muted">주문한 기기에서 다시 열거나, 로그인한 뒤 마이페이지에서 확인해 주세요.</p>
+          <div className="done-links">
+            <Link className="btn-black inline" to="/my/orders">
+              내 주문 보기
+            </Link>
+            <Link className="btn-line inline" to="/products">
+              쇼핑 계속하기
+            </Link>
+          </div>
+        </div>
+      </Page>
+    )
+  if (!o) return <Page narrow />
+  return <OrderDone o={o} />
+}
+
+// 주문 완료 화면 — 위에서 아래로: 완료 표시 · 주문번호 / 배송 진행 / 주문 상품 / 결제 · 배송지 / 버튼
+const ARRIVE_DAYS = [7, 14] // 해외직배송 안내 (상품 상세와 같은 문구)
+const md = (d) => `${d.getMonth() + 1}월 ${d.getDate()}일`
+
+function OrderDone({ o }) {
+  const paid = o.status === 'paid'
+  const [copied, setCopied] = useState(false)
+  const d = o.delivery
+  const base = new Date(o.paid_at || o.created_at)
+  const eta = ARRIVE_DAYS.map((n) => md(new Date(base.getTime() + n * 86400000)))
+  const next = d && d.steps[d.level + 1]
+  const ship = o.shipping
   return (
     <Page narrow>
-      <div className="done">
-        <h1>{o?.status === 'paid' ? '주문이 완료됐어요' : '주문 확인'}</h1>
-        {error && <p className="error">{error}</p>}
-        {o && (
-          <>
-            <p className="muted">
-              주문번호 {o.code} · {PROGRESS[o.progress]} · {PAY_METHOD[o.provider] || ''}
-              {o.test ? ' (테스트)' : ''}
-            </p>
-            <dl className="kv">
-              <dt>상품</dt>
-              <dd>{o.item_name}</dd>
-              <dt>결제 금액</dt>
-              <dd>{won(o.total_amount)}</dd>
-              <dt>받는 분</dt>
-              <dd>
-                {o.shipping?.name} · {o.shipping?.addr1} {o.shipping?.addr2}
-              </dd>
-            </dl>
-          </>
+      <div className="od">
+        <section className="od-head">
+          <span className={`od-mark ${paid ? '' : 'wait'}`} aria-hidden="true">
+            {paid ? (
+              <svg viewBox="0 0 24 24" width="28" height="28">
+                <path d="M5 12.5l4.5 4.5L19 7.5" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            ) : (
+              '!'
+            )}
+          </span>
+          <p className="od-eyebrow">{paid ? 'ORDER COMPLETE' : 'ORDER'}</p>
+          <h1>{paid ? '주문이 완료됐어요' : PROGRESS[o.progress] || '주문 확인'}</h1>
+          <p className="muted">
+            {paid ? '주문해 주셔서 감사해요. 현지에서 상품을 준비해 보내 드릴게요.' : '결제가 끝나지 않았어요.'}
+          </p>
+          <button
+            className="od-code"
+            onClick={() => {
+              navigator.clipboard?.writeText(o.code)
+              setCopied(true)
+              setTimeout(() => setCopied(false), 1500)
+            }}
+          >
+            주문번호 <b>{o.code}</b> <span className="muted">{copied ? '복사했어요' : '복사'}</span>
+          </button>
+          {o.test && <p className="od-test">테스트 결제예요 — 실제로 돈이 나가지 않았어요</p>}
+        </section>
+
+        {paid && d && (
+          <section className="od-sec">
+            <div className="od-sec-head">
+              <h2>배송 진행</h2>
+              <span className="muted small">
+                {d.level >= 7 ? '배송 완료' : `도착 예정 ${eta[0]} ~ ${eta[1]}`}
+              </span>
+            </div>
+            <div className="od-bar" aria-label={`${d.steps.length}단계 중 ${d.level + 1}단계`}>
+              {d.steps.map((s) => (
+                <span key={s.key} className={s.done ? 'on' : ''} />
+              ))}
+            </div>
+            <div className="od-now">
+              <b>{d.label}</b>
+              {d.steps[d.level]?.at && <span className="muted small">{kst(d.steps[d.level].at)}</span>}
+            </div>
+            {next && <p className="muted small">다음 단계 · {next.label}</p>}
+          </section>
         )}
-        <div className="done-links">
-          <Link className="btn-black inline" to={`/my/orders/${code}`}>
-            주문 상세 보기
+
+        <section className="od-sec">
+          <div className="od-sec-head">
+            <h2>주문 상품</h2>
+            <span className="muted small">{o.quantity}개</span>
+          </div>
+          <ul className="od-items">
+            {(o.items || []).map((it, i) => (
+              <li key={i}>
+                {it.img ? <img src={it.img} alt="" /> : <span className="od-noimg" />}
+                <div>
+                  <p>{it.name}</p>
+                  <p className="muted small">
+                    {won(it.unit_price)} · {it.qty}개
+                  </p>
+                </div>
+                <b>{won(it.amount)}</b>
+              </li>
+            ))}
+          </ul>
+        </section>
+
+        <section className="od-sec od-two">
+          <div>
+            <h2>결제 정보</h2>
+            <dl className="od-kv">
+              <dt>결제 수단</dt>
+              <dd>{PAY_METHOD[o.provider] || '-'}</dd>
+              <dt>결제 일시</dt>
+              <dd>{o.paid_at ? kst(o.paid_at) : '-'}</dd>
+              <dt>배송비</dt>
+              <dd>무료</dd>
+              <dt className="od-total">결제 금액</dt>
+              <dd className="od-total">{won(o.total_amount)}</dd>
+            </dl>
+          </div>
+          <div>
+            <h2>배송지</h2>
+            {ship ? (
+              <dl className="od-kv">
+                <dt>받는 분</dt>
+                <dd>{ship.name}</dd>
+                <dt>주소</dt>
+                <dd>
+                  {ship.addr1} {ship.addr2}
+                </dd>
+                {ship.memo && (
+                  <>
+                    <dt>메모</dt>
+                    <dd>{ship.memo}</dd>
+                  </>
+                )}
+              </dl>
+            ) : (
+              <p className="muted small">배송이 없는 주문이에요.</p>
+            )}
+          </div>
+        </section>
+
+        <div className="od-links">
+          <Link className="btn-black" to={`/my/orders/${o.code}`}>
+            배송 현황 보기
           </Link>
-          <Link className="btn-line inline" to="/products">
+          <Link className="btn-line" to="/products">
             쇼핑 계속하기
           </Link>
         </div>
