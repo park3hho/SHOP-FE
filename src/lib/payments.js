@@ -37,10 +37,10 @@ const origin = () => window.location.origin
 /** 판매 상품 (지금은 시험용 TEST-10 · 10원) → [{ sku, name, price, max_qty }] */
 export const getProducts = async () => (await call('/products')).items
 
-/** 쓸 수 있는 결제수단 → { kakao: { enabled, test }, naver: { enabled, test, mode, client_id, chain_id, sdk_url } } */
+/** 쓸 수 있는 결제수단 → { kakao: { enabled, test }, naver: { enabled, test, … }, toss: { enabled, test } (카드) } */
 export const getPayConfig = async () => {
-  const { kakao, naver } = await call('/payments/config')
-  return { kakao, naver }
+  const { kakao, naver, toss } = await call('/payments/config')
+  return { kakao, naver, toss: toss || { enabled: false, test: true } }
 }
 
 /** 주문 만들기 — items: [{ sku, qty }] → order { code, total_amount, status, … }
@@ -101,6 +101,42 @@ export const payWithNaver = async (code) => {
 /** /pay/naver/return 화면에서 (resultCode === 'Success') — 승인 → order (status 'paid') */
 export const approveNaver = async (code, paymentId) =>
   (await call('/payments/naver/approve', { ...ref(code), payment_id: paymentId })).order
+
+// ── 카드 (토스페이먼츠 결제창) ──────────────────────────────────
+// 흐름: payWithCard(code) → 토스 카드 결제창 → /pay/toss/success?order=…&paymentKey=…&orderId=…&amount=…
+//       → 그 화면에서 approveCard(code, paymentKey, amount). 실패·취소면 /pay/toss/fail?order=…&code=…&message=…
+
+let tossLoading = null
+const loadTossSdk = (url) =>
+  (tossLoading ??= new Promise((resolve, reject) => {
+    if (window.TossPayments) return resolve()
+    const s = document.createElement('script')
+    s.src = url
+    s.onload = () => resolve()
+    s.onerror = () => {
+      tossLoading = null
+      reject(new Error('카드 결제창을 불러오지 못했어요'))
+    }
+    document.head.appendChild(s)
+  }))
+
+/** 카드 결제창을 연다 (PC 는 창, 휴대폰은 페이지 이동). 값은 전부 서버가 정한 것 */
+export const payWithCard = async (code) => {
+  const r = await call('/payments/toss/ready', { ...ref(code), return_origin: origin() })
+  await loadTossSdk(r.sdk_url)
+  const payment = window.TossPayments(r.client_key).payment({ customerKey: r.customer_key })
+  try {
+    await payment.requestPayment(r.request)
+  } catch (e) {
+    // PC 결제창을 닫으면 여기로 온다 — 주문을 다시 결제할 수 있게 되돌린다
+    await reportReturn(code, 'toss', e?.code === 'USER_CANCEL' ? 'cancel' : 'fail', e?.message).catch(() => {})
+    throw new Error(e?.code === 'USER_CANCEL' ? '카드 결제를 취소했어요' : e?.message || '카드 결제창을 열지 못했어요')
+  }
+}
+
+/** /pay/toss/success 화면에서 — 승인 → order (status 'paid') */
+export const approveCard = async (code, paymentKey, amount) =>
+  (await call('/payments/toss/approve', { ...ref(code), payment_key: paymentKey, amount: Number(amount) })).order
 
 // ── 공통 ───────────────────────────────────────────────────
 

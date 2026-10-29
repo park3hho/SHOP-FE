@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 
 import {
+  approveCard,
   approveKakao,
   approveNaver,
   cancelTestPayment,
@@ -18,6 +19,7 @@ import './pay.css'
 //   /pay/kakao/approve   카카오 결제 후 → 승인
 //   /pay/kakao/cancel · /pay/kakao/fail
 //   /pay/naver/return    네이버 결제 후 → 승인 (resultCode=Success) 또는 안내
+//   /pay/toss/success    카드(토스페이먼츠) 인증 후 → 승인 · /pay/toss/fail → 안내
 //   /pay/done?order=     결과
 
 const won = (n) => `${Number(n || 0).toLocaleString('ko-KR')}원`
@@ -144,9 +146,18 @@ function ReturnPage({ provider, kind }) {
         done(await approveKakao(code, q.get('pg_token')))
       } else if (provider === 'naver' && q.get('resultCode') === 'Success') {
         done(await approveNaver(code, q.get('paymentId')))
+      } else if (provider === 'toss' && kind === 'success') {
+        done(await approveCard(code, q.get('paymentKey'), q.get('amount')))
       } else {
-        const result = provider === 'naver' ? q.get('resultCode') || 'fail' : kind
-        const message = q.get('resultMessage') || ''
+        const result =
+          provider === 'naver'
+            ? q.get('resultCode') || 'fail'
+            : provider === 'toss'
+              ? q.get('code') === 'PAY_PROCESS_CANCELED'
+                ? 'cancel'
+                : 'fail'
+              : kind
+        const message = q.get('resultMessage') || (provider === 'toss' ? q.get('message') : '') || ''
         setOrder(await reportReturn(code, provider, result, message))
         setMsg(
           result === 'cancel' || result === 'UserCancel'
@@ -240,6 +251,8 @@ export default function PayPages() {
   if (path === '/pay/kakao/cancel') return <ReturnPage provider="kakao" kind="cancel" />
   if (path === '/pay/kakao/fail') return <ReturnPage provider="kakao" kind="fail" />
   if (path === '/pay/naver/return') return <ReturnPage provider="naver" kind="return" />
+  if (path === '/pay/toss/success') return <ReturnPage provider="toss" kind="success" />
+  if (path === '/pay/toss/fail') return <ReturnPage provider="toss" kind="fail" />
   if (path === '/pay/done') return <DonePage />
   return <TestPage />
 }
