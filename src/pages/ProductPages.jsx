@@ -59,9 +59,8 @@ export function ProductListPage({ query }) {
 
 // 100ml당 가격 — 용량을 모르면 null
 const per100 = (o) => (o.volume_ml ? Math.round((o.price / o.volume_ml) * 100) : null)
-const liters = (ml) => (ml >= 1000 ? `${+(ml / 1000).toFixed(2)}L` : `${ml}ml`)
 
-// 옵션 고르기 — 구성(용량·입수)별로 묶고, 구성·옵션 모두 가격 높은 순. 각 줄에 100ml당 가격.
+// 옵션 고르기 — 구성(용량·입수)별로 묶고, 구성·옵션 모두 가격 낮은 순 (2026-10-29 사용자: 싼 것부터). 각 줄에 100ml당 가격.
 //   옵션이 많으면 목록 칸 안에서만 스크롤 (기본 select 는 항목이 많으면 읽기 어려웠다, 2026-10-29)
 function OptionPicker({ options, value, onChange }) {
   const groups = new Map()
@@ -71,8 +70,8 @@ function OptionPicker({ options, value, onChange }) {
     groups.get(k).push(o)
   }
   const list = [...groups.entries()]
-    .map(([pack, items]) => ({ pack, items: [...items].sort((a, b) => b.price - a.price) }))
-    .sort((a, b) => b.items[0].price - a.items[0].price)
+    .map(([pack, items]) => ({ pack, items: [...items].sort((a, b) => a.price - b.price) }))
+    .sort((a, b) => a.items[0].price - b.items[0].price)
   const showHead = list.length > 1 || list[0]?.pack
   return (
     <div className="opt-pick" role="radiogroup" aria-label="옵션 선택">
@@ -81,7 +80,6 @@ function OptionPicker({ options, value, onChange }) {
           {showHead && (
             <div className="opt-head">
               <b>{g.pack || '기본'}</b>
-              {g.items[0].volume_ml && <span>총 {liters(g.items[0].volume_ml)}</span>}
             </div>
           )}
           {g.items.map((o) => {
