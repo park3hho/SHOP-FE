@@ -210,25 +210,33 @@ export function MyOrderPage({ code }) {
               <b>{won(it.amount)}</b>
             </div>
           ))}
-          <h2 className="sub-title">배송지</h2>
-          <dl className="kv">
-            <dt>받는 분</dt>
-            <dd>
-              {o.shipping?.name} · {o.shipping?.phone}
-            </dd>
-            <dt>주소</dt>
-            <dd>
-              ({o.shipping?.zip}) {o.shipping?.addr1} {o.shipping?.addr2}
-            </dd>
-            {o.shipping?.memo && (
-              <>
-                <dt>메모</dt>
-                <dd>{o.shipping.memo}</dd>
-              </>
-            )}
-            <dt>통관부호</dt>
-            <dd>{o.pccc}</dd>
-          </dl>
+          {/* 배송지 없는 주문(결제 시험 상품)은 배송지 칸을 아예 안 보인다 */}
+          {o.shipping && (
+            <>
+              <h2 className="sub-title">배송지</h2>
+              <dl className="kv">
+                <dt>받는 분</dt>
+                <dd>{[o.shipping.name, o.shipping.phone].filter(Boolean).join(' · ') || '-'}</dd>
+                <dt>주소</dt>
+                <dd>
+                  {o.shipping.zip && `(${o.shipping.zip}) `}
+                  {[o.shipping.addr1, o.shipping.addr2].filter(Boolean).join(' ') || '-'}
+                </dd>
+                {o.shipping.memo && (
+                  <>
+                    <dt>메모</dt>
+                    <dd>{o.shipping.memo}</dd>
+                  </>
+                )}
+                {o.pccc && (
+                  <>
+                    <dt>통관부호</dt>
+                    <dd>{o.pccc}</dd>
+                  </>
+                )}
+              </dl>
+            </>
+          )}
           <h2 className="sub-title">결제</h2>
           <dl className="kv">
             <dt>결제 수단</dt>
