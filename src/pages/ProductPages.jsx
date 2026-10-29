@@ -1,29 +1,63 @@
 import { useEffect, useRef, useState } from 'react'
 
 import { Page } from '../components/Layout'
-import { getProduct, listProducts, useMember, won } from '../lib/api'
+import { getProduct, listProducts, useCategories, useMember, won } from '../lib/api'
 import { addToCart, setBuyNow } from '../lib/cart'
 import { Link, navigate } from '../lib/router'
 
-// 상품 목록 /products?q= — 4열 그리드 (29CM 카테고리 목록처럼 사진 크게, 글자는 아래 3줄)
+// 상품 목록 /products?q=&cat=&sub=&form= — 4열 그리드 (29CM 카테고리 목록처럼 사진 크게, 글자는 아래 3줄)
+//   cat·sub·form = AGC 제품 분류. 분류로 들어오면 제목 아래에 같은 대분류의 소분류 글자 탭
 export function ProductListPage({ query }) {
   const q = query.get('q') || ''
+  const cat = query.get('cat') || ''
+  const sub = query.get('sub') || ''
+  const form = query.get('form') || ''
   const page = Number(query.get('page')) || 1
+  const cats = useCategories()
   const [data, setData] = useState(null)
   const [error, setError] = useState('')
   useEffect(() => {
     setData(null)
-    listProducts(q, page, 40)
+    listProducts(q, page, 40, { cat, sub, form })
       .then(setData)
       .catch((e) => setError(e.message))
-  }, [q, page])
+  }, [q, cat, sub, form, page])
   const pages = data ? Math.ceil(data.total / data.size) : 1
+  const c = cats?.find((x) => x.code === cat)
+  const title = q
+    ? `‘${q.split('|')[0]}’`
+    : c
+      ? c.sub.find((s) => s.code === sub)?.label || c.forms.find((f) => f.code === form)?.label || c.label
+      : '전체 상품'
+  const href = (o) => {
+    const p = new URLSearchParams()
+    for (const [k, v] of Object.entries({ q, cat, sub, form, ...o })) if (v && !(k === 'page' && v === 1)) p.set(k, v)
+    return `/products?${p}`
+  }
   return (
     <Page>
       <div className="list-head">
-        <h1>{q ? `‘${q.split('|')[0]}’` : '전체 상품'}</h1>
+        <h1>{title}</h1>
         {data && <span className="muted">{data.total}개</span>}
       </div>
+      {c && (
+        <nav className="cat-tabs">
+          <Link className={!sub && !form ? 'on' : ''} to={href({ sub: '', form: '', page: 1 })}>
+            전체
+          </Link>
+          {c.sub.map((s) => (
+            <Link key={s.code} className={s.code === sub ? 'on' : ''} to={href({ sub: s.code, page: 1 })}>
+              {s.label}
+            </Link>
+          ))}
+          {c.forms.length > 0 && <span className="bar" />}
+          {c.forms.map((f) => (
+            <Link key={f.code} className={f.code === form ? 'on' : ''} to={href({ form: f.code === form ? '' : f.code, page: 1 })}>
+              {f.label}
+            </Link>
+          ))}
+        </nav>
+      )}
       {error && <p className="error">{error}</p>}
       {data && !data.items.length && <p className="empty">찾는 상품이 없어요.</p>}
       <div className="grid">
@@ -43,11 +77,7 @@ export function ProductListPage({ query }) {
       {pages > 1 && (
         <div className="pager">
           {Array.from({ length: pages }, (_, i) => i + 1).map((n) => (
-            <Link
-              key={n}
-              className={n === page ? 'on' : ''}
-              to={`/products?${q ? `q=${encodeURIComponent(q)}&` : ''}page=${n}`}
-            >
+            <Link key={n} className={n === page ? 'on' : ''} to={href({ page: n })}>
               {n}
             </Link>
           ))}
@@ -56,7 +86,6 @@ export function ProductListPage({ query }) {
     </Page>
   )
 }
-
 // 100ml당 가격 — 용량을 모르면 null
 const per100 = (o) => (o.volume_ml ? Math.round((o.price / o.volume_ml) * 100) : null)
 

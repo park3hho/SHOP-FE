@@ -1,13 +1,17 @@
-import { useState } from 'react'
+import { Fragment, useState } from 'react'
 
-import { useMember } from '../lib/api'
+import { useCategories, useMember } from '../lib/api'
 import { useCart } from '../lib/cart'
 import { Link, navigate, useLocation } from '../lib/router'
+
+// 서버 응답 전 잠깐 보이는 메뉴 (자리 흔들림 방지) — 음료 소분류만
+const FALLBACK = [{ code: 'beverage', sub: [['soda', '탄산'], ['juice', '주스'], ['tea', '차음료'], ['milktea', '밀크티'], ['coffee', '커피'], ['milk', '우유·두유'], ['functional', '이온·기능성']].map(([code, label]) => ({ code, label })) }]
 
 // 공통 머리 — 로고 · 메뉴 · 검색 · 로그인/마이페이지 · 장바구니(개수)
 export function Header() {
   const member = useMember()
   const cart = useCart()
+  const cats = useCategories()
   const { path } = useLocation()
   // 메뉴 순서: Today(메인 = 첫 화면, 기획 큐레이션) → Shop(상품) → Story(MKT 팀 글 — 나중에 올림)
   const onToday = path === '/'
@@ -34,22 +38,23 @@ export function Header() {
             </Link>
           </div>
           <div className="gnb-sub">
-            {/* [보이는 이름, 검색어] — 검색어 a|b 는 하나라도 맞으면. 이온음료는 상품명에 '전해질'로 적혀 있어 그 말로 찾는다 */}
-            {[
-              ['탄산', '탄산'],
-              ['주스', '주스'],
-              ['차', '차|레몬티|아이스티'], // 레몬티·아이스티는 이름에 '차'가 없다
-              ['밀크티', '밀크티'],
-              ['우유', '우유'],
-              ['커피', '커피'],
-              ['이온음료', '전해질'],
-            ].map(([label, q]) => (
-              <Link key={label} to={`/products?q=${encodeURIComponent(q)}`}>
-                {label}
-              </Link>
+            {/* 분류 메뉴 — AGC 제품 분류 (GET /categories, 파는 상품이 있는 것만). 대분류가 둘 이상이면 Drink | Tea 로 나눈다 */}
+            {(cats || FALLBACK).map((c, i, all) => (
+              <Fragment key={c.code}>
+                {i > 0 && <span className="bar" />}
+                {all.length > 1 && (
+                  <Link className="it" to={`/products?cat=${c.code}`}>
+                    {c.en}
+                  </Link>
+                )}
+                {c.sub.map((s) => (
+                  <Link key={s.code} to={`/products?cat=${c.code}&sub=${s.code}`}>
+                    {s.label}
+                  </Link>
+                ))}
+              </Fragment>
             ))}
-          </div>
-        </nav>
+          </div>        </nav>
         <div className="util">
           <form
             className="search"

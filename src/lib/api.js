@@ -28,8 +28,29 @@ export async function call(path, { method, body } = {}) {
 }
 
 // ── 상품 ──
-export const listProducts = (q = '', page = 1, size = 40) =>
-  call(`/products?page=${page}&size=${size}${q ? `&q=${encodeURIComponent(q)}` : ''}`)
+// filter = { cat, sub, form } — 분류 (AGC 제품 분류, GET /categories)
+export const listProducts = (q = '', page = 1, size = 40, filter = {}) => {
+  const f = Object.entries(filter)
+    .filter(([, v]) => v)
+    .map(([k, v]) => `&${k}=${encodeURIComponent(v)}`)
+    .join('')
+  return call(`/products?page=${page}&size=${size}${q ? `&q=${encodeURIComponent(q)}` : ''}${f}`)
+}
+
+// 메뉴 분류 — 지금 파는 상품이 있는 것만 (서버가 거름). 한 번 받아 모든 화면이 같이 쓴다
+let catsPromise = null
+export function useCategories() {
+  const [cats, setCats] = useState(null)
+  useEffect(() => {
+    catsPromise ||= call('/categories').then((r) => r.categories).catch(() => (catsPromise = null, []))
+    let alive = true
+    catsPromise.then((c) => alive && setCats(c))
+    return () => {
+      alive = false
+    }
+  }, [])
+  return cats
+}
 export const getProduct = async (code) => (await call(`/products/${encodeURIComponent(code)}`)).product
 
 // ── 회원 (로그인 상태는 앱 전체가 같이 본다) ──
