@@ -1,5 +1,8 @@
 // 메인 화면 = Today (메뉴 첫째, 기획 큐레이션 — 지금은 디자인 시안). Shop(/products) 둘째, Story(/story, MKT 팀 글) 셋째.
+import { useEffect, useState } from 'react'
+
 import data from './data/mock.js'
+import { listProducts } from './lib/api'
 import { Link } from './lib/router'
 
 const won = (n) => n.toLocaleString('ko-KR')
@@ -50,7 +53,37 @@ function Hero({ img, en, ko }) {
   )
 }
 
+// '지금 많이 담는 음료' — 사진은 AGC 에 저장된 지금 값으로 덮는다 (대표이미지 = 연출 · 전환용 = 마우스 올리면).
+// 목업(mock.js)의 사진 주소는 예전 값이라, AGC 에서 대표 사진을 바꾸면 여기에 안 따라왔다. 가격·할인율은 아직 시안 값.
+function useLiveBest() {
+  const [best, setBest] = useState(data.best)
+  useEffect(() => {
+    let alive = true
+    Promise.all(
+      data.best.map((p) =>
+        listProducts(p.code, 1, 1)
+          .then((r) => r.items.find((x) => x.code === p.code))
+          .catch(() => null),
+      ),
+    ).then((live) => {
+      if (!alive) return
+      setBest(
+        data.best.map((p, i) => {
+          const l = live[i]
+          if (!l?.img) return p
+          return { ...p, stage: l.img, hover: l.img_hover || p.img, img: l.img_hover || l.img }
+        }),
+      )
+    })
+    return () => {
+      alive = false
+    }
+  }, [])
+  return best
+}
+
 export default function App({ Header, Footer }) {
+  const best = useLiveBest()
   return (
     <>
       <Header />
@@ -77,7 +110,7 @@ export default function App({ Header, Footer }) {
           <Link to="/products">전체보기</Link>
         </div>
         <div className="best-grid">
-          {data.best.map((p, i) => {
+          {best.map((p, i) => {
             // p.stage = 대표이미지(연출) · p.hover = 대표이미지(전환용, 없으면 실물 p.img 로 전환)
             // AGC 에 저장된 연출컷(api.eidofood.com/files/...)은 '연출 이미지' 글씨가 파일에 들어 있어 글씨를 또 얹지 않는다
             const burned = p.stage && !p.stage.startsWith('/img/')

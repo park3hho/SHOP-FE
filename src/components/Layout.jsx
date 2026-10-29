@@ -34,9 +34,18 @@ export function Header() {
             </Link>
           </div>
           <div className="gnb-sub">
-            {['탄산', '주스', '차', '밀크티', '우유', '커피', '전해질'].map((w) => (
-              <Link key={w} to={`/products?q=${encodeURIComponent(w)}`}>
-                {w}
+            {/* [보이는 이름, 검색어] — 이온음료는 상품명에 '전해질'로 적혀 있어 그 말로 찾는다 */}
+            {[
+              ['탄산', '탄산'],
+              ['주스', '주스'],
+              ['차', '차'],
+              ['밀크티', '밀크티'],
+              ['우유', '우유'],
+              ['커피', '커피'],
+              ['이온음료', '전해질'],
+            ].map(([label, q]) => (
+              <Link key={label} to={`/products?q=${encodeURIComponent(q)}`}>
+                {label}
               </Link>
             ))}
           </div>
