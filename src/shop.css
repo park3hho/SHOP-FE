@@ -106,6 +106,9 @@
 .summary dd { margin: 0; text-align: right; }
 .summary-total { display: flex; justify-content: space-between; align-items: baseline; margin: 20px 0; padding-top: 16px; border-top: 1px solid var(--line); }
 .summary-total b { font-size: 24px; }
+/* 주문서 — 빨간 확인 문구와 결제하기 버튼 사이를 띄운다 (붙어 보이면 버튼 설명처럼 읽힘) */
+.summary .error { margin: 12px 0 0; }
+.summary .error + .btn-black, .summary .agree + .btn-black { margin-top: 16px; }
 .summary .agree { font-size: 13px; line-height: 1.5; margin: 0 0 16px; }
 .empty-box { text-align: center; padding: 80px 0; display: grid; gap: 20px; justify-items: center; }
 .sections section { padding: 0 0 36px; margin-bottom: 36px; border-bottom: 1px solid var(--line); }
