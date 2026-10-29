@@ -69,6 +69,30 @@
 .pd-total { display: flex; justify-content: space-between; align-items: baseline; margin: 24px 0 16px; font-size: 14px; }
 .pd-total b { font-size: 22px; }
 .pd-buttons { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+/* 옵션 고르기 — 구성별 묶음 · 가격 높은 순 · 100ml당 가격. 많으면 이 칸 안에서만 스크롤 */
+.opt-pick { max-height: 380px; overflow-y: auto; border: 1px solid var(--ink); }
+.opt-group + .opt-group { border-top: 1px solid var(--ink); }
+.opt-head { position: sticky; top: 0; z-index: 1; display: flex; justify-content: space-between; align-items: baseline; gap: 8px; padding: 10px 14px 8px; background: var(--bg-sub); font-size: 13px; }
+.opt-head span { color: var(--sub); font-size: 12px; }
+.opt-row { display: flex; width: 100%; align-items: center; justify-content: space-between; gap: 12px; min-height: 52px; padding: 8px 14px; border: 0; border-top: 1px solid var(--line); background: #fff; color: var(--ink); font: 14px var(--font); text-align: left; cursor: pointer; }
+.opt-head + .opt-row { border-top: 0; }
+.opt-row:hover { background: #fafafa; }
+.opt-row.on { box-shadow: inset 3px 0 0 var(--ink); background: #f4f4f2; font-weight: 600; }
+.opt-name { flex: 1; min-width: 0; }
+.opt-price { display: grid; justify-items: end; gap: 1px; white-space: nowrap; }
+.opt-price b { font-size: 15px; }
+.opt-price small { color: var(--mute); font-size: 11px; font-weight: 400; }
+.pd-line { margin-top: 12px; }
+
+/* 모바일 — 총액 + 장바구니·바로구매를 화면 아래에 고정 (옵션을 보면서 바로 담고 살 수 있게) */
+@media (max-width: 900px) {
+  .pd-buy { position: fixed; left: 0; right: 0; bottom: 0; z-index: 50; padding: 10px 16px calc(10px + env(safe-area-inset-bottom)); border-top: 1px solid var(--ink); background: #fff; }
+  .pd-buy .pd-total { margin: 0 0 8px; }
+  .pd-buy .pd-total b { font-size: 18px; }
+  .pd-buttons .btn-line, .pd-buttons .btn-black { height: 48px; }
+  .page:has(.pd-buy) { padding-bottom: 140px; }
+  .opt-pick { max-height: 52vh; }
+}
 .qty { display: inline-flex; align-items: center; border: 1px solid var(--line); background: #fff; }
 .qty button { width: 32px; height: 32px; font-size: 16px; }
 .qty span { min-width: 32px; text-align: center; font-size: 14px; }

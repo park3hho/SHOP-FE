@@ -57,6 +57,58 @@ export function ProductListPage({ query }) {
   )
 }
 
+// 100ml당 가격 — 용량을 모르면 null
+const per100 = (o) => (o.volume_ml ? Math.round((o.price / o.volume_ml) * 100) : null)
+const liters = (ml) => (ml >= 1000 ? `${+(ml / 1000).toFixed(2)}L` : `${ml}ml`)
+
+// 옵션 고르기 — 구성(용량·입수)별로 묶고, 구성·옵션 모두 가격 높은 순. 각 줄에 100ml당 가격.
+//   옵션이 많으면 목록 칸 안에서만 스크롤 (기본 select 는 항목이 많으면 읽기 어려웠다, 2026-10-29)
+function OptionPicker({ options, value, onChange }) {
+  const groups = new Map()
+  for (const o of options) {
+    const k = o.pack || ''
+    if (!groups.has(k)) groups.set(k, [])
+    groups.get(k).push(o)
+  }
+  const list = [...groups.entries()]
+    .map(([pack, items]) => ({ pack, items: [...items].sort((a, b) => b.price - a.price) }))
+    .sort((a, b) => b.items[0].price - a.items[0].price)
+  const showHead = list.length > 1 || list[0]?.pack
+  return (
+    <div className="opt-pick" role="radiogroup" aria-label="옵션 선택">
+      {list.map((g) => (
+        <div className="opt-group" key={g.pack || '-'}>
+          {showHead && (
+            <div className="opt-head">
+              <b>{g.pack || '기본'}</b>
+              {g.items[0].volume_ml && <span>총 {liters(g.items[0].volume_ml)}</span>}
+            </div>
+          )}
+          {g.items.map((o) => {
+            const u = per100(o)
+            return (
+              <button
+                type="button"
+                role="radio"
+                aria-checked={o.sku === value}
+                key={o.sku}
+                className={`opt-row${o.sku === value ? ' on' : ''}`}
+                onClick={() => onChange(o.sku)}
+              >
+                <span className="opt-name">{o.flavor || o.name}</span>
+                <span className="opt-price">
+                  <b>{won(o.price)}</b>
+                  {u && <small>100ml당 {won(u)}</small>}
+                </span>
+              </button>
+            )
+          })}
+        </div>
+      ))}
+    </div>
+  )
+}
+
 // 상품 상세 /products/:code — 왼쪽 사진, 오른쪽 정보·옵션·수량·구매 (아래로 상세 이미지 · 상품 정보)
 export function ProductDetailPage({ code }) {
   const member = useMember()
@@ -68,6 +120,7 @@ export function ProductDetailPage({ code }) {
   const [msg, setMsg] = useState('')
   const [tab, setTab] = useState('detail')
   const detailRef = useRef(null) // 상세 이미지 스크롤 칸
+  const optRef = useRef(null) // 옵션 목록 — 안 고르고 담으면 여기로
 
   useEffect(() => {
     getProduct(code)
@@ -100,6 +153,7 @@ export function ProductDetailPage({ code }) {
   const need = () => {
     if (!opt) {
       setMsg('옵션을 골라 주세요')
+      optRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' })
       return false
     }
     return true
@@ -131,14 +185,9 @@ export function ProductDetailPage({ code }) {
             <dt>배송</dt>
             <dd>{p.shipping.note}</dd>
           </dl>
-          <select className="select" value={sku} onChange={(e) => (setSku(e.target.value), setMsg(''))}>
-            <option value="">옵션 선택</option>
-            {p.options.map((o) => (
-              <option key={o.sku} value={o.sku}>
-                {o.name} · {won(o.price)}
-              </option>
-            ))}
-          </select>
+          <div ref={optRef}>
+            <OptionPicker options={p.options} value={sku} onChange={(s) => (setSku(s), setMsg(''))} />
+          </div>
           {opt && (
             <div className="pd-line">
               <span>{opt.name}</span>
@@ -146,6 +195,7 @@ export function ProductDetailPage({ code }) {
               <b>{won(opt.price * qty)}</b>
             </div>
           )}
+          <div className="pd-buy">
           <div className="pd-total">
             <span>총 상품 금액</span>
             <b>{won(opt ? opt.price * qty : 0)}</b>
@@ -171,6 +221,7 @@ export function ProductDetailPage({ code }) {
             >
               바로구매
             </button>
+          </div>
           </div>
           {msg && (
             <p className="hint">
