@@ -85,4 +85,8 @@ button { font: inherit; background: none; border: 0; padding: 0; cursor: pointer
   .col-hero { grid-template-columns: 1fr; }
   .col { border-left: 0; border-top: 1px solid var(--line); padding: 28px 20px 40px; }
   .hero-text strong { font-size: 40px; }
+  /* 머리 — 마이페이지·장바구니가 한 글자씩 세로로 꺾이던 것: 글자는 한 줄, 검색칸이 줄어든다 */
+  .util { gap: 10px; white-space: nowrap; }
+  .util .search { min-width: 0; }
+  .util .search input { width: 72px; }
 }
