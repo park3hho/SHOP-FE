@@ -49,13 +49,13 @@ export function ProductListPage({ query }) {
           <Link className={!sub && !form ? 'on' : ''} to={href({ sub: '', form: '', page: 1 })}>
             전체
           </Link>
-          {c.sub.map((s) => (
+          {c.sub.filter((s) => s.count).map((s) => (
             <Link key={s.code} className={s.code === sub ? 'on' : ''} to={href({ sub: s.code, page: 1 })}>
               {s.label}
             </Link>
           ))}
-          {c.forms.length > 0 && <span className="bar" />}
-          {c.forms.map((f) => (
+          {c.forms.some((f) => f.count) && <span className="bar" />}
+          {c.forms.filter((f) => f.count).map((f) => (
             <Link key={f.code} className={f.code === form ? 'on' : ''} to={href({ form: f.code === form ? '' : f.code, page: 1 })}>
               {f.label}
             </Link>
