@@ -9,9 +9,10 @@ export function Header() {
   const member = useMember()
   const cart = useCart()
   const { path } = useLocation()
-  // 메뉴 순서: Story(메인 = 첫 화면) → Shop(상품). Story 내용은 나중에 MKT 팀 글로 바뀐다
-  const onStory = path === '/' || path === '/story'
+  // 메뉴 순서: Today(메인 = 첫 화면, 기획 큐레이션) → Shop(상품) → Story(MKT 팀 글 — 나중에 올림)
+  const onToday = path === '/'
   const onShop = path.startsWith('/products')
+  const onStory = path.startsWith('/story')
   const [q, setQ] = useState('')
   return (
     <>
@@ -22,11 +23,14 @@ export function Header() {
         </Link>
         <nav className="gnb">
           <div className="gnb-main">
-            <Link to="/" className={onStory ? 'on' : ''}>
-              Story
+            <Link to="/" className={onToday ? 'on' : ''}>
+              Today
             </Link>
             <Link to="/products" className={onShop ? 'on' : ''}>
               Shop
+            </Link>
+            <Link to="/story" className={onStory ? 'on' : ''}>
+              Story
             </Link>
           </div>
           <div className="gnb-sub">

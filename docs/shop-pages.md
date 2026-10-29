@@ -4,7 +4,7 @@
 경로 → 화면은 `src/Root.jsx`. 서버 API 는 SHOP-BE (`/api/shop` → `https://api.eidofood.com/shop`).
 
 ```
-Story (메인) / · /story            App.jsx — 메뉴 첫째. 지금은 디자인 시안, 나중에 MKT 팀 글로 교체
+Today (메인) /                      App.jsx — 메뉴 첫째, 기획 큐레이션 (지금은 디자인 시안)
 ├─ Shop (메뉴 둘째)
 │  ├─ 목록 /products?q=&page=        검색 · 메뉴 단어 · 4열 그리드 · 40개씩 페이지
 │  └─ 상세 /products/:code           사진(썸네일) · 옵션 · 수량 · 장바구니 · 바로구매
@@ -26,6 +26,7 @@ Story (메인) / · /story            App.jsx — 메뉴 첫째. 지금은 디�
 │     ├─ 회원정보 수정 /my/profile     이름 · 휴대폰 · 통관부호 · 광고 수신 · 회원 탈퇴
 │     ├─ 배송지 관리 /my/addresses     추가 · 수정 · 기본 · 삭제 (10개까지)
 │     └─ 비밀번호 변경 /my/password    바꾸면 다른 기기 로그아웃
+├─ Story /story (메뉴 셋째) ········· MKT 팀 글이 올라갈 자리 — 지금은 준비 중 화면
 ├─ 안내 (초안 — 오픈 전 검토)
 │  ├─ 이용약관 /terms
 │  ├─ 개인정보처리방침 /privacy

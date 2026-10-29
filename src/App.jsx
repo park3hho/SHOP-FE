@@ -1,5 +1,4 @@
-// 메인 화면 = Story (메뉴 첫째). 지금은 디자인 시안 — 나중에 MKT 팀이 쓴 글(기획전 · 스토리)로 바꾼다.
-// 상품 목록은 Shop (/products, 메뉴 둘째).
+// 메인 화면 = Today (메뉴 첫째, 기획 큐레이션 — 지금은 디자인 시안). Shop(/products) 둘째, Story(/story, MKT 팀 글) 셋째.
 import data from './data/mock.js'
 import { Link } from './lib/router'
 

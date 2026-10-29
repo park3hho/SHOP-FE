@@ -60,3 +60,18 @@ export function GuidePage() {
     </Page>
   )
 }
+
+// Story /story — MKT 팀이 쓴 글(브랜드 이야기 · 맛 소개)이 올라갈 자리. 지금은 준비 중
+export function StoryPage() {
+  return (
+    <Page narrow>
+      <div className="empty-box">
+        <h1 className="page-title">Story</h1>
+        <p>중국 음료에 얽힌 이야기를 준비하고 있어요.</p>
+        <a className="btn-line inline" href="/products">
+          상품 먼저 보기
+        </a>
+      </div>
+    </Page>
+  )
+}

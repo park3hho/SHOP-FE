@@ -2,7 +2,7 @@ import App from './App.jsx'
 import { Footer, Header } from './components/Layout'
 import { match, useLocation } from './lib/router'
 import { LoginPage, SignupPage } from './pages/AuthPages'
-import { GuidePage, PrivacyPage, TermsPage } from './pages/InfoPages'
+import { GuidePage, PrivacyPage, StoryPage, TermsPage } from './pages/InfoPages'
 import {
   MyAddressesPage,
   MyHomePage,
@@ -20,8 +20,9 @@ import './shop.css'
 export default function Root() {
   const { path, query } = useLocation()
   let m
-  // 메인 = Story (MKT 팀 글이 올라갈 자리). /story 로 와도 같은 화면
-  if (path === '/' || path === '/story') return <App Header={Header} Footer={Footer} />
+  // 메인 = Today (기획 큐레이션). Story 는 MKT 팀 글이 올라갈 자리 (지금은 준비 중 화면)
+  if (path === '/') return <App Header={Header} Footer={Footer} />
+  if (path === '/story') return <StoryPage />
   if (path.startsWith('/pay')) return <PayPages />
   if (path === '/products') return <ProductListPage query={query} />
   if ((m = match('/products/:code', path))) return <ProductDetailPage key={m.code} code={m.code} />
