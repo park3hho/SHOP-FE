@@ -43,9 +43,10 @@ export const getPayConfig = async () => {
   return { kakao, naver }
 }
 
-/** 주문 만들기 — items: [{ sku, qty }] → order { code, total_amount, status, … } */
-export const createOrder = async (items) => {
-  const { order, token } = await call('/orders', { items })
+/** 주문 만들기 — items: [{ sku, qty }] → order { code, total_amount, status, … }
+ *  실제 상품(회원)은 extra 에 { shipping:{name,phone,zip,addr1,addr2}, pccc, memo, agree:true, save_address, save_pccc } */
+export const createOrder = async (items, extra = {}) => {
+  const { order, token } = await call('/orders', { items, ...extra })
   localStorage.setItem(KEY(order.code), token)
   return order
 }

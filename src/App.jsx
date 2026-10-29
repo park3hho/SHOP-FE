@@ -1,4 +1,5 @@
 import data from './data/mock.js'
+import { Link } from './lib/router'
 
 const won = (n) => n.toLocaleString('ko-KR')
 
@@ -12,7 +13,7 @@ function Heart() {
 
 function Row({ p }) {
   return (
-    <a className="row" href="#">
+    <Link className="row" to={`/products/${p.code}`}>
       <img className="row-img" src={p.img} alt="" loading="lazy" />
       <div className="row-body">
         <div className="brand">{p.brand}</div>
@@ -20,8 +21,8 @@ function Row({ p }) {
         <div className="price"><em>{p.off}%</em>{won(p.price)}</div>
         <div className="tags"><span>무료배송</span><span>해외직배송</span></div>
       </div>
-      <button className="like" aria-label="찜"><Heart /></button>
-    </a>
+      <button className="like" aria-label="찜" onClick={(e) => e.preventDefault()}><Heart /></button>
+    </Link>
   )
 }
 
@@ -48,21 +49,10 @@ function Hero({ img, en, ko }) {
   )
 }
 
-export default function App() {
+export default function App({ Header, Footer }) {
   return (
     <>
-      <div className="notice">오픈 준비 중이에요 · 지금 보이는 화면은 디자인 시안이고 가격은 예시예요</div>
-      <header className="header">
-        <a className="logo" href="/">EIDOFOOD</a>
-        <nav className="gnb">
-          <div className="gnb-main"><a>Best</a><a>New</a><a>Story</a><a>Set</a></div>
-          <div className="gnb-sub">
-            <a>탄산</a><a>주스</a><a>차</a><a>밀크티</a><a>우유·두유</a><a>커피</a><a>전해질</a>
-            <i className="bar" /><a className="it">Beijing</a><a className="it">Guangdong</a>
-          </div>
-        </nav>
-        <div className="util"><a>로그인</a><a>장바구니 0</a></div>
-      </header>
+      <Header />
 
       <main className="board">
         <div className="col col-hero">
@@ -83,7 +73,7 @@ export default function App() {
         <div className="best-head">
           <h2>지금 많이 담는 음료</h2>
           <span className="best-note">사진에 마우스를 올리면 실제 상품 사진 · 할인율은 쿠팡 판매가 대비</span>
-          <a>전체보기</a>
+          <Link to="/products">전체보기</Link>
         </div>
         <div className="best-grid">
           {data.best.map((p, i) => {
@@ -91,7 +81,7 @@ export default function App() {
             // AGC 에 저장된 연출컷(api.eidofood.com/files/...)은 '연출 이미지' 글씨가 파일에 들어 있어 글씨를 또 얹지 않는다
             const burned = p.stage && !p.stage.startsWith('/img/')
             return (
-            <a className="card" href="#" key={p.code}>
+            <Link className="card" to={`/products/${p.code}`} key={p.code}>
               <div className={`card-img${p.stage ? ' has-stage' : ''}`}>
                 {p.stage && <img className="stage" src={p.stage} alt="" loading="lazy" />}
                 <img className="real" src={(p.stage && p.hover) || p.img} alt="" loading="lazy" />
@@ -102,19 +92,13 @@ export default function App() {
               <div className="name">{p.name}</div>
               <div className="cn">{p.cn}</div>
               <div className="price"><em>{p.off}%</em>{won(p.price)}</div>
-            </a>
+            </Link>
             )
           })}
         </div>
       </section>
 
-      <footer className="footer">
-        <div className="logo small">EIDOFOOD</div>
-        <p>
-          상호 이도 · 대표 박찬호 · 사업자등록번호 715-07-03296 · 통신판매업 제 2026-충남아산-0848 호<br />
-          수입식품등 인터넷구매대행업 영업등록 제 20260028639 호
-        </p>
-      </footer>
+      <Footer />
     </>
   )
 }

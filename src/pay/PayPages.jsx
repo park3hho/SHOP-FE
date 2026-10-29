@@ -131,12 +131,19 @@ function ReturnPage({ provider, kind }) {
       return
     }
     const run = async () => {
+      // 실제 상품 주문(회원)은 승인 뒤 주문 완료 화면으로
+      const done = (o) => {
+        if (o.items.some((i) => !i.sku.startsWith('TEST-'))) {
+          window.location.replace(`/order/complete?order=${encodeURIComponent(o.code)}`)
+          return
+        }
+        setOrder(o)
+        setMsg('결제가 완료됐어요')
+      }
       if (provider === 'kakao' && kind === 'approve') {
-        setOrder(await approveKakao(code, q.get('pg_token')))
-        setMsg('결제가 완료됐어요')
+        done(await approveKakao(code, q.get('pg_token')))
       } else if (provider === 'naver' && q.get('resultCode') === 'Success') {
-        setOrder(await approveNaver(code, q.get('paymentId')))
-        setMsg('결제가 완료됐어요')
+        done(await approveNaver(code, q.get('paymentId')))
       } else {
         const result = provider === 'naver' ? q.get('resultCode') || 'fail' : kind
         const message = q.get('resultMessage') || ''
@@ -207,9 +214,17 @@ function Actions({ order, onChange }) {
             {busy ? '취소 중…' : '테스트 결제 취소'}
           </button>
         )}
-        <a className="pay-link" href="/pay/test">
-          결제 시험으로
-        </a>
+        {order && order.items.some((i) => !i.sku.startsWith('TEST-')) ? (
+          order.status !== 'paid' && (
+            <a className="pay-link" href="/order/checkout">
+              주문서로 돌아가기
+            </a>
+          )
+        ) : (
+          <a className="pay-link" href="/pay/test">
+            결제 시험으로
+          </a>
+        )}
         <a className="pay-link" href="/">
           홈으로
         </a>
