@@ -72,7 +72,8 @@ button { font: inherit; background: none; border: 0; padding: 0; cursor: pointer
   .header { grid-template-columns: 1fr auto; padding: 14px 20px; }
   .gnb { grid-column: 1 / -1; grid-row: 2; margin-top: 10px; overflow-x: auto; }
   .gnb-main { font-size: 20px; }
-  .gnb-sub { flex-wrap: nowrap; font-size: 14px; white-space: nowrap; }
+  .gnb-sub { flex-wrap: nowrap; font-size: 14px; white-space: nowrap; overflow-x: auto; scrollbar-width: none; } /* 옆으로 밀어 보는 메뉴 — 스크롤바는 숨김 */
+  .gnb-sub::-webkit-scrollbar { display: none; }
   .board { grid-template-columns: 1fr 1fr; }
   .col-hero { grid-column: 1 / -1; display: grid; grid-template-columns: 1fr 1fr; }
   .col:nth-child(2) { border-left: 0; }

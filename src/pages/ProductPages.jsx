@@ -22,6 +22,10 @@ export function ProductListPage({ query }) {
       .then(setData)
       .catch((e) => setError(e.message))
   }, [q, cat, sub, form, page])
+  // 모바일에서 소분류 탭이 옆으로 넘칠 때 고른 탭이 화면 안에 오게
+  useEffect(() => {
+    document.querySelector('.cat-tabs a.on')?.scrollIntoView({ block: 'nearest', inline: 'center' })
+  }, [cats, sub, form])
   const pages = data ? Math.ceil(data.total / data.size) : 1
   const c = cats?.find((x) => x.code === cat)
   const title = q
