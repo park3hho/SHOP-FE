@@ -229,6 +229,8 @@ export function CheckoutPage() {
       sessionStorage.setItem('shop.checkoutSkus', JSON.stringify(lines.map((l) => l.sku)))
       if (pay === 'kakao') await payWithKakao(order.code)
       else await payWithNaver(order.code)
+      // 결제창으로 넘어가지 못했으면 (팝업 차단 등) 다시 누를 수 있게
+      setTimeout(() => setBusy(false), 6000)
     } catch (e) {
       setError(e.message)
       setBusy(false)
