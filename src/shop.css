@@ -204,7 +204,7 @@ input[type='checkbox'] { accent-color: #000; }
 .social-btn:hover { filter: brightness(0.97); }
 .or-line { display: flex; align-items: center; gap: 12px; margin: 12px 0 4px; color: var(--sub); font-size: 13px; }
 .or-line::before, .or-line::after { content: ''; flex: 1; height: 1px; background: #e5e5e5; }
-.auth .notice, .social-links .notice { margin: 0; padding: 12px 14px; background: #f6f6f4; font-size: 14px; line-height: 1.5; }
+.auth .notice, .social-links .notice { margin: 0; padding: 12px 14px; background: #f6f6f4; color: var(--ink); font-size: 14px; line-height: 1.5; text-align: left; letter-spacing: normal; }
 .social-links { display: grid; gap: 10px; margin-top: 28px; padding-top: 20px; border-top: 1px solid #e5e5e5; }
 .social-links h3 { margin: 0; font-size: 16px; }
 .social-link-row { display: flex; align-items: center; gap: 10px; }
