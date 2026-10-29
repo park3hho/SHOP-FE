@@ -3,6 +3,7 @@
   --sub: #5d5d5d;
   --mute: #a0a0a0;
   --line: #e4e4e4;
+  --bg-sub: #f3f3f1; /* 흰 사진·상세 이미지가 흰 바탕에 묻히지 않게 깔아 주는 옅은 회색 */
   --accent: #ff4800;
   --font: 'Pretendard Variable', Pretendard, -apple-system, 'Apple SD Gothic Neo', sans-serif;
 }

@@ -75,8 +75,13 @@
 .tabs { display: flex; gap: 32px; margin: 80px 0 32px; border-bottom: 1px solid var(--line); }
 .tabs button { padding: 14px 0; font-size: 16px; font-weight: 600; color: var(--sub); border-bottom: 2px solid transparent; margin-bottom: -1px; }
 .tabs button.on { color: var(--ink); border-bottom-color: var(--ink); }
-.pd-detail { max-width: 860px; margin: 0 auto; }
-.pd-detail img { display: block; width: 100%; }
+/* 상세 이미지 — 흰 칸이 많은 이미지라 페이지 흰 바탕과 경계가 안 보였다 → 옅은 회색 띠 위에 1px 선으로 올린다 */
+.pd-detail { max-width: 908px; margin: 0 auto; padding: 24px; background: var(--bg-sub); }
+.pd-detail img { display: block; width: 100%; border-left: 1px solid var(--line); border-right: 1px solid var(--line); }
+.pd-detail img:first-child { border-top: 1px solid var(--line); }
+.pd-detail img:last-child { border-bottom: 1px solid var(--line); }
+.pd-detail .empty { margin: 0; text-align: center; }
+@media (max-width: 720px) { .pd-detail { padding: 10px; } }
 .kv { display: grid; grid-template-columns: 120px 1fr; margin: 0; border-top: 1px solid var(--ink); font-size: 14px; }
 .kv dt, .kv dd { margin: 0; padding: 14px 0; border-bottom: 1px solid var(--line); }
 .kv dt { color: var(--sub); }
