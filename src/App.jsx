@@ -53,37 +53,50 @@ function Hero({ img, en, ko }) {
   )
 }
 
-// '지금 많이 담는 음료' — 사진은 AGC 에 저장된 지금 값으로 덮는다 (대표이미지 = 연출 · 전환용 = 마우스 올리면).
-// 목업(mock.js)의 사진 주소는 예전 값이라, AGC 에서 대표 사진을 바꾸면 여기에 안 따라왔다. 가격·할인율은 아직 시안 값.
-function useLiveBest() {
-  const [best, setBest] = useState(data.best)
+// 첫 화면 목록(mock.js)은 시안이라 상품 코드가 고정. 지금 자사몰에서 파는 상품(마켓 등록 + 삭제 안 됨)만 남기고,
+// 사진은 AGC 에 저장된 지금 값으로 덮는다 (대표이미지 = 연출 · 전환용 = 마우스 올리면). 가격·할인율은 아직 시안 값.
+//   안 파는·삭제된 상품이 첫 화면에 남아 눌러도 '없는 상품'이 뜨던 것 (2026-10-29)
+const LISTS = ['tea', 'lychee', 'fridge', 'milktea', 'best']
+
+async function onSaleMap() {
+  const map = new Map()
+  for (let page = 1; page <= 10; page++) {
+    const r = await listProducts('', page, 100)
+    r.items.forEach((x) => map.set(x.code, x))
+    if (r.items.length < 100 || map.size >= r.total) break
+  }
+  return map
+}
+
+function useLiveData() {
+  const [lists, setLists] = useState(null) // 확인 전엔 비워 둔다 — 안 파는 상품이 잠깐 비쳤다 사라지지 않게
   useEffect(() => {
     let alive = true
-    Promise.all(
-      data.best.map((p) =>
-        listProducts(p.code, 1, 1)
-          .then((r) => r.items.find((x) => x.code === p.code))
-          .catch(() => null),
-      ),
-    ).then((live) => {
-      if (!alive) return
-      setBest(
-        data.best.map((p, i) => {
-          const l = live[i]
-          if (!l?.img) return p
-          return { ...p, stage: l.img, hover: l.img_hover || p.img, img: l.img_hover || l.img }
-        }),
-      )
-    })
+    onSaleMap()
+      .then((sale) => {
+        if (!alive) return
+        const out = {}
+        for (const k of LISTS) {
+          out[k] = data[k]
+            .filter((p) => sale.has(p.code))
+            .map((p) => {
+              const l = sale.get(p.code)
+              if (k !== 'best' || !l.img) return p
+              return { ...p, stage: l.img, hover: l.img_hover || p.img, img: l.img_hover || l.img }
+            })
+        }
+        setLists(out)
+      })
+      .catch(() => alive && setLists(Object.fromEntries(LISTS.map((k) => [k, data[k]])))) // 서버가 안 되면 시안 그대로
     return () => {
       alive = false
     }
   }, [])
-  return best
+  return lists || Object.fromEntries(LISTS.map((k) => [k, []]))
 }
-
 export default function App({ Header, Footer }) {
-  const best = useLiveBest()
+  const live = useLiveData()
+  const best = live.best
   return (
     <>
       <Header />
@@ -94,12 +107,12 @@ export default function App({ Header, Footer }) {
           <Hero img="/img/lychee.jpg" en="LYCHEE SEASON" ko="리치 · 광둥에서 온 여름의 맛" />
         </div>
         <div className="col">
-          <Story img="/img/tea.jpg" title="무가당 차, 처음이라면" sub="단맛 없이 향만 남긴 중국 편의점 차예요." items={data.tea} />
-          <Story img="/img/lychee-glass.jpg" title="리치 탄산 모음" sub="한국에선 보기 힘든 리치맛만 골랐어요." items={data.lychee} />
+          <Story img="/img/tea.jpg" title="무가당 차, 처음이라면" sub="단맛 없이 향만 남긴 중국 편의점 차예요." items={live.tea} />
+          <Story img="/img/lychee-glass.jpg" title="리치 탄산 모음" sub="한국에선 보기 힘든 리치맛만 골랐어요." items={live.lychee} />
         </div>
         <div className="col">
-          <Story img="/img/fridge.jpg" title="중국 편의점 냉장고, 그대로" sub="현지에서 제일 많이 집는 음료를 옮겨왔어요." items={data.fridge} />
-          <Story img="/img/milktea.jpg" title="밀크티, 홍콩식부터 소금 밀크티까지" sub="한국 편의점엔 없는 밀크티만 모았어요." items={data.milktea} />
+          <Story img="/img/fridge.jpg" title="중국 편의점 냉장고, 그대로" sub="현지에서 제일 많이 집는 음료를 옮겨왔어요." items={live.fridge} />
+          <Story img="/img/milktea.jpg" title="밀크티, 홍콩식부터 소금 밀크티까지" sub="한국 편의점엔 없는 밀크티만 모았어요." items={live.milktea} />
         </div>
       </main>
 

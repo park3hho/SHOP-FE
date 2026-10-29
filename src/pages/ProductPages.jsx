@@ -21,7 +21,7 @@ export function ProductListPage({ query }) {
   return (
     <Page>
       <div className="list-head">
-        <h1>{q ? `‘${q}’` : '전체 상품'}</h1>
+        <h1>{q ? `‘${q.split('|')[0]}’` : '전체 상품'}</h1>
         {data && <span className="muted">{data.total}개</span>}
       </div>
       {error && <p className="error">{error}</p>}
