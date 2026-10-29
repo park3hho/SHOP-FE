@@ -4,8 +4,8 @@
 경로 → 화면은 `src/Root.jsx`. 서버 API 는 SHOP-BE (`/api/shop` → `https://api.eidofood.com/shop`).
 
 ```
-홈 /                                  App.jsx (디자인 시안 + 상품 링크)
-├─ 상품
+Story (메인) / · /story            App.jsx — 메뉴 첫째. 지금은 디자인 시안, 나중에 MKT 팀 글로 교체
+├─ Shop (메뉴 둘째)
 │  ├─ 목록 /products?q=&page=        검색 · 메뉴 단어 · 4열 그리드 · 40개씩 페이지
 │  └─ 상세 /products/:code           사진(썸네일) · 옵션 · 수량 · 장바구니 · 바로구매
 │                                     └ 탭: 상품 상세(AGC 상세 이미지) · 상품 정보 · 배송·교환·환불

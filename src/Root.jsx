@@ -20,7 +20,8 @@ import './shop.css'
 export default function Root() {
   const { path, query } = useLocation()
   let m
-  if (path === '/') return <App Header={Header} Footer={Footer} />
+  // 메인 = Story (MKT 팀 글이 올라갈 자리). /story 로 와도 같은 화면
+  if (path === '/' || path === '/story') return <App Header={Header} Footer={Footer} />
   if (path.startsWith('/pay')) return <PayPages />
   if (path === '/products') return <ProductListPage query={query} />
   if ((m = match('/products/:code', path))) return <ProductDetailPage key={m.code} code={m.code} />

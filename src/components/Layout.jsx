@@ -2,12 +2,16 @@ import { useState } from 'react'
 
 import { useMember } from '../lib/api'
 import { useCart } from '../lib/cart'
-import { Link, navigate } from '../lib/router'
+import { Link, navigate, useLocation } from '../lib/router'
 
 // 공통 머리 — 로고 · 메뉴 · 검색 · 로그인/마이페이지 · 장바구니(개수)
 export function Header() {
   const member = useMember()
   const cart = useCart()
+  const { path } = useLocation()
+  // 메뉴 순서: Story(메인 = 첫 화면) → Shop(상품). Story 내용은 나중에 MKT 팀 글로 바뀐다
+  const onStory = path === '/' || path === '/story'
+  const onShop = path.startsWith('/products')
   const [q, setQ] = useState('')
   return (
     <>
@@ -18,8 +22,12 @@ export function Header() {
         </Link>
         <nav className="gnb">
           <div className="gnb-main">
-            <Link to="/products">Shop</Link>
-            <Link to="/">Story</Link>
+            <Link to="/" className={onStory ? 'on' : ''}>
+              Story
+            </Link>
+            <Link to="/products" className={onShop ? 'on' : ''}>
+              Shop
+            </Link>
           </div>
           <div className="gnb-sub">
             {['탄산', '주스', '차', '밀크티', '우유', '커피', '전해질'].map((w) => (

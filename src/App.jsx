@@ -1,3 +1,5 @@
+// 메인 화면 = Story (메뉴 첫째). 지금은 디자인 시안 — 나중에 MKT 팀이 쓴 글(기획전 · 스토리)로 바꾼다.
+// 상품 목록은 Shop (/products, 메뉴 둘째).
 import data from './data/mock.js'
 import { Link } from './lib/router'
 
