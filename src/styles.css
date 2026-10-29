@@ -90,3 +90,17 @@ button { font: inherit; background: none; border: 0; padding: 0; cursor: pointer
   .util .search { min-width: 0; }
   .util .search input { width: 72px; }
 }
+
+/* 스크롤바 — 얇고 조용하게 (흰 바탕 · 옅은 회색 손잡이, 올리면 진하게). 옵션 목록 · 상세 이미지 칸 · 페이지 공통 (2026-10-29)
+   Chrome·Edge·Safari 는 ::-webkit-scrollbar, Firefox 는 scrollbar-width/color */
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { border: 3px solid transparent; border-radius: 999px; background: #cfcfcb padding-box; }
+::-webkit-scrollbar-thumb:hover { background: #8d8d89 padding-box; }
+::-webkit-scrollbar-corner { background: transparent; }
+@supports (-moz-appearance: none) {
+  * { scrollbar-width: thin; scrollbar-color: #cfcfcb transparent; }
+}
+/* 칸 안 스크롤(옵션 목록 · 상세 이미지)은 조금 더 얇게 */
+.opt-pick::-webkit-scrollbar, .pd-detail-scroll::-webkit-scrollbar { width: 8px; }
+.opt-pick::-webkit-scrollbar-thumb, .pd-detail-scroll::-webkit-scrollbar-thumb { border-width: 2px; }
