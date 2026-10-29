@@ -156,7 +156,7 @@ export const PROGRESS = {
   delivered: '배송 완료',
   cancelled: '주문 취소',
 }
-export const PAY_METHOD = { kakao: '카카오페이', naver: '네이버페이', toss: '신용·체크카드' }
+export const PAY_METHOD = { kakao: '카카오페이', naver: '네이버페이', toss: '신용·체크카드', portone: '신용·체크카드' }
 export const kst = (iso) =>
   iso
     ? new Date(iso).toLocaleString('sv-SE', { timeZone: 'Asia/Seoul' }).slice(0, 16).replace('T', ' ')

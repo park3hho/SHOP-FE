@@ -37,10 +37,10 @@ const origin = () => window.location.origin
 /** 판매 상품 (지금은 시험용 TEST-10 · 10원) → [{ sku, name, price, max_qty }] */
 export const getProducts = async () => (await call('/products')).items
 
-/** 쓸 수 있는 결제수단 → { kakao: { enabled, test }, naver: { enabled, test, … }, toss: { enabled, test } (카드) } */
+/** 쓸 수 있는 결제수단 → { kakao, naver, card: { enabled, test } (신용·체크카드 = 포트원 · KCP) } */
 export const getPayConfig = async () => {
-  const { kakao, naver, toss } = await call('/payments/config')
-  return { kakao, naver, toss: toss || { enabled: false, test: true } }
+  const { kakao, naver, card } = await call('/payments/config')
+  return { kakao, naver, card: card || { enabled: false, test: true } }
 }
 
 /** 주문 만들기 — items: [{ sku, qty }] → order { code, total_amount, status, … }
@@ -120,8 +120,8 @@ const loadTossSdk = (url) =>
     document.head.appendChild(s)
   }))
 
-/** 카드 결제창을 연다 (PC 는 창, 휴대폰은 페이지 이동). 값은 전부 서버가 정한 것 */
-export const payWithCard = async (code) => {
+/** (대기) 토스페이먼츠 카드 결제창 — 지금 주문서는 payWithCard(포트원 · KCP)를 쓴다 */
+export const payWithToss = async (code) => {
   const r = await call('/payments/toss/ready', { ...ref(code), return_origin: origin() })
   await loadTossSdk(r.sdk_url)
   const payment = window.TossPayments(r.client_key).payment({ customerKey: r.customer_key })
@@ -135,8 +135,44 @@ export const payWithCard = async (code) => {
 }
 
 /** /pay/toss/success 화면에서 — 승인 → order (status 'paid') */
-export const approveCard = async (code, paymentKey, amount) =>
+export const approveToss = async (code, paymentKey, amount) =>
   (await call('/payments/toss/approve', { ...ref(code), payment_key: paymentKey, amount: Number(amount) })).order
+
+// ── 신용·체크카드 (포트원 V2 · NHN KCP) — 주문서가 쓰는 것 ───────────────────────────
+// 흐름: payWithCard(code) → KCP 결제창
+//   PC: 이 함수가 끝날 때 서버 확인까지 해서 order(paid)를 돌려준다
+//   휴대폰: /pay/portone/return?order=…&paymentId=…(&code=…) 로 이동 → 그 화면에서 approveCard
+
+let portoneLoading = null
+const loadPortone = (url) =>
+  (portoneLoading ??= new Promise((resolve, reject) => {
+    if (window.PortOne) return resolve()
+    const s = document.createElement('script')
+    s.src = url
+    s.onload = () => resolve()
+    s.onerror = () => {
+      portoneLoading = null
+      reject(new Error('카드 결제창을 불러오지 못했어요'))
+    }
+    document.head.appendChild(s)
+  }))
+
+/** 카드 결제 → (PC) order · (휴대폰) 페이지 이동으로 돌아오지 않음. 값은 전부 서버가 정한 것 */
+export const payWithCard = async (code) => {
+  const r = await call('/payments/portone/ready', { ...ref(code), return_origin: origin() })
+  await loadPortone(r.sdk_url)
+  const res = await window.PortOne.requestPayment(r.request)
+  if (!res || res.code) {
+    const cancel = /CANCEL/i.test(res?.code || '') || /취소/.test(res?.message || '')
+    await reportReturn(code, 'portone', cancel ? 'cancel' : 'fail', res?.message).catch(() => {})
+    throw new Error(cancel ? '카드 결제를 취소했어요' : res?.message || '카드 결제가 되지 않았어요')
+  }
+  return approveCard(code, res.paymentId)
+}
+
+/** 결제창이 끝난 뒤 — 서버가 포트원에서 직접 확인 → order (status 'paid') */
+export const approveCard = async (code, paymentId) =>
+  (await call('/payments/portone/approve', { ...ref(code), payment_id: paymentId })).order
 
 // ── 공통 ───────────────────────────────────────────────────
 

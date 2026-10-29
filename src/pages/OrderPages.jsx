@@ -193,7 +193,7 @@ export function CheckoutPage() {
     })
     getPayConfig().then((c) => {
       setCfg(c)
-      setPay(c.toss.enabled ? 'toss' : c.kakao.enabled ? 'kakao' : c.naver.enabled ? 'naver' : '')
+      setPay(c.card.enabled ? 'card' : c.kakao.enabled ? 'kakao' : c.naver.enabled ? 'naver' : '')
     })
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [member])
@@ -227,8 +227,12 @@ export function CheckoutPage() {
       )
       sessionStorage.setItem('shop.checkoutFrom', new URLSearchParams(window.location.search).get('buy') || '')
       sessionStorage.setItem('shop.checkoutSkus', JSON.stringify(lines.map((l) => l.sku)))
-      if (pay === 'toss') await payWithCard(order.code)
-      else if (pay === 'kakao') await payWithKakao(order.code)
+      if (pay === 'card') {
+        // PC 는 결제창이 이 화면 위에 뜨고, 끝나면 바로 주문 완료로 (휴대폰은 페이지 이동)
+        const paid = await payWithCard(order.code)
+        if (paid?.status === 'paid') window.location.replace(`/order/complete?order=${encodeURIComponent(paid.code)}`)
+        return
+      } else if (pay === 'kakao') await payWithKakao(order.code)
       else await payWithNaver(order.code)
       // 결제창으로 넘어가지 못했으면 (팝업 차단 등) 다시 누를 수 있게
       setTimeout(() => setBusy(false), 6000)
@@ -317,7 +321,7 @@ export function CheckoutPage() {
             <h2>결제 수단</h2>
             <div className="pay-pick">
               {[
-                ['toss', '신용·체크카드'],
+                ['card', '신용·체크카드'],
                 ['kakao', '카카오페이'],
                 ['naver', '네이버페이'],
               ].map(([k, label]) => (

@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react'
 import {
   approveCard,
   approveKakao,
+  approveToss,
   approveNaver,
   cancelTestPayment,
   createOrder,
@@ -147,13 +148,15 @@ function ReturnPage({ provider, kind }) {
       } else if (provider === 'naver' && q.get('resultCode') === 'Success') {
         done(await approveNaver(code, q.get('paymentId')))
       } else if (provider === 'toss' && kind === 'success') {
-        done(await approveCard(code, q.get('paymentKey'), q.get('amount')))
+        done(await approveToss(code, q.get('paymentKey'), q.get('amount')))
+      } else if (provider === 'portone' && !q.get('code') && q.get('paymentId')) {
+        done(await approveCard(code, q.get('paymentId')))
       } else {
         const result =
           provider === 'naver'
             ? q.get('resultCode') || 'fail'
-            : provider === 'toss'
-              ? q.get('code') === 'PAY_PROCESS_CANCELED'
+            : provider === 'toss' || provider === 'portone'
+              ? /CANCEL/i.test(q.get('code') || '')
                 ? 'cancel'
                 : 'fail'
               : kind
@@ -253,6 +256,7 @@ export default function PayPages() {
   if (path === '/pay/naver/return') return <ReturnPage provider="naver" kind="return" />
   if (path === '/pay/toss/success') return <ReturnPage provider="toss" kind="success" />
   if (path === '/pay/toss/fail') return <ReturnPage provider="toss" kind="fail" />
+  if (path === '/pay/portone/return') return <ReturnPage provider="portone" kind="return" />
   if (path === '/pay/done') return <DonePage />
   return <TestPage />
 }

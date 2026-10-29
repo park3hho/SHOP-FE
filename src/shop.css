@@ -305,5 +305,5 @@ input[type='checkbox'] { accent-color: #000; }
   .od-two { grid-template-columns: 1fr; gap: 24px; }
 }
 
-/* 결제 수단 — 카드(토스페이먼츠)는 한 줄 전체, 간편결제 둘은 아래 반반 (2026-10-29) */
-.pay-pick button.toss { grid-column: 1 / -1; }
+/* 결제 수단 — 카드(포트원 · KCP)는 한 줄 전체, 간편결제 둘은 아래 반반 (2026-10-29) */
+.pay-pick button.card { grid-column: 1 / -1; }
