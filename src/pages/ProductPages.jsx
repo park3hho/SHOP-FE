@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 import { Page } from '../components/Layout'
 import { getProduct, listProducts, useMember, won } from '../lib/api'
@@ -67,6 +67,7 @@ export function ProductDetailPage({ code }) {
   const [qty, setQty] = useState(1)
   const [msg, setMsg] = useState('')
   const [tab, setTab] = useState('detail')
+  const detailRef = useRef(null) // 상세 이미지 스크롤 칸
 
   useEffect(() => {
     getProduct(code)
@@ -191,9 +192,21 @@ export function ProductDetailPage({ code }) {
         </button>
       </div>
       {tab === 'detail' && (
+        // 상세 이미지는 아주 길어서 정해진 높이 안에서만 스크롤 — 다 내려도 페이지로 돌아오기 쉽게
         <div className="pd-detail">
           {p.detail_images.length ? (
-            p.detail_images.map((u) => <img key={u} src={u} alt="" loading="lazy" />)
+            <div className="pd-detail-scroll" ref={detailRef}>
+              {p.detail_images.map((u) => (
+                <img key={u} src={u} alt="" loading="lazy" />
+              ))}
+              <button
+                type="button"
+                className="pd-detail-top"
+                onClick={() => detailRef.current?.scrollTo({ top: 0, behavior: 'smooth' })}
+              >
+                맨 위로
+              </button>
+            </div>
           ) : (
             <p className="empty">상세 설명을 준비하고 있어요.</p>
           )}
