@@ -1,7 +1,7 @@
 import App from './App.jsx'
 import { Footer, Header } from './components/Layout'
 import { match, useLocation } from './lib/router'
-import { LoginPage, SignupPage } from './pages/AuthPages'
+import { LoginPage, SignupPage, SocialSignupPage } from './pages/AuthPages'
 import { GuidePage, PrivacyPage, StoryPage, TermsPage } from './pages/InfoPages'
 import {
   MyAddressesPage,
@@ -31,6 +31,7 @@ export default function Root() {
   if (path === '/order/complete') return <OrderCompletePage query={query} />
   if (path === '/login') return <LoginPage query={query} />
   if (path === '/signup') return <SignupPage query={query} />
+  if (path === '/signup/social') return <SocialSignupPage />
   if (path === '/my') return <MyHomePage />
   if (path === '/my/orders') return <MyOrdersPage />
   if ((m = match('/my/orders/:code', path))) return <MyOrderPage key={m.code} code={m.code} />

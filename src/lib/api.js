@@ -80,9 +80,34 @@ export const updateProfile = async (body) => {
 }
 export const changePassword = (current, next) =>
   call('/me/password', { body: { current, new: next } })
-export const withdraw = async (password) => {
-  await call('/me/withdraw', { body: { password } })
+// 소셜로만 가입한 회원은 비밀번호 대신 confirm: true
+export const withdraw = async (password, confirm = false) => {
+  await call('/me/withdraw', { body: { password: password || null, confirm } })
   setMember(null)
+}
+
+// ── 소셜 로그인 (카카오 · 네이버) — 서버가 인가 화면으로 보내고, 돌아오면 next 또는 /signup/social ──
+export const SOCIAL = {
+  kakao: { label: '카카오' },
+  naver: { label: '네이버' },
+}
+// 이 주소로 화면 전체를 옮긴다 (fetch 가 아니라 window.location) — mode: 'login' | 'link'(마이페이지 연결)
+export const socialStartUrl = (provider, next = '/my', mode = 'login') =>
+  `${API}/auth/${provider}/start?next=${encodeURIComponent(next)}&mode=${mode}`
+export const getProviders = async () => (await call('/auth/providers')).providers
+export const socialPending = async () => (await call('/auth/social/pending')).pending
+export const socialComplete = async (body) => {
+  const d = await call('/auth/social/complete', { body })
+  setMember(d.member)
+  return d
+}
+export const getProfileFull = async () => call('/me/profile') // { member, socials, providers }
+export const unlinkSocial = async (provider) =>
+  (await call(`/me/social/${provider}`, { method: 'DELETE' })).socials
+export const createPassword = async (next, email) => {
+  const m = (await call('/me/password/create', { body: { new: next, email: email || null } })).member
+  refreshMember()
+  return m
 }
 
 // ── 배송지 ──

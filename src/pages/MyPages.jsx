@@ -4,8 +4,9 @@ import { Page } from '../components/Layout'
 import {
   cancelMyOrder,
   changePassword,
+  createPassword,
   deleteAddress,
-  getProfile,
+  getProfileFull,
   kst,
   listAddresses,
   logout,
@@ -14,6 +15,9 @@ import {
   PAY_METHOD,
   PROGRESS,
   saveAddress,
+  SOCIAL,
+  socialStartUrl,
+  unlinkSocial,
   updateProfile,
   useMember,
   withdraw,
@@ -359,15 +363,74 @@ export function MyAddressesPage() {
   )
 }
 
-// /my/profile — 이름 · 휴대폰 · 개인통관고유부호 · 광고 수신 · 탈퇴
+// 마이페이지 › 회원정보 › 연결된 계정 — 카카오 · 네이버 연결 · 해제
+//   서버가 돌려보낸 결과: ?linked=kakao · ?social=taken|already&provider=…
+const LINK_MSG = {
+  taken: (p) => `이 ${p} 계정은 다른 회원에 연결돼 있어요.`,
+  already: (p) => `이미 다른 ${p} 계정이 연결돼 있어요. 해제한 뒤 다시 연결해 주세요.`,
+}
+function SocialLinks({ socials, providers, onChange }) {
+  const [error, setError] = useState('')
+  const q = new URLSearchParams(window.location.search)
+  const label = SOCIAL[q.get('provider') || q.get('linked')]?.label || ''
+  const notice = q.get('linked') ? `${label} 계정을 연결했어요.` : LINK_MSG[q.get('social')]?.(label) || ''
+  return (
+    <div className="social-links">
+      <h3>연결된 계정</h3>
+      {notice && <p className="notice">{notice}</p>}
+      {Object.keys(SOCIAL).map((k) => {
+        const s = socials.find((x) => x.provider === k)
+        return (
+          <div key={k} className="social-link-row">
+            <span className={`social-dot ${k}`} />
+            <b>{SOCIAL[k].label}</b>
+            <span className="muted small">{s ? `연결됨 ${s.email ? `· ${s.email}` : ''}` : '연결 안 됨'}</span>
+            {s ? (
+              <button
+                className="btn-line small"
+                onClick={async () => {
+                  if (!window.confirm(`${SOCIAL[k].label} 연결을 해제할까요?`)) return
+                  setError('')
+                  try {
+                    onChange(await unlinkSocial(k))
+                  } catch (e) {
+                    setError(e.message)
+                  }
+                }}
+              >
+                해제
+              </button>
+            ) : providers?.[k]?.ready === false ? (
+              <span className="muted small">준비 중</span>
+            ) : (
+              <a className="btn-line small" href={socialStartUrl(k, '/my/profile', 'link')}>
+                연결
+              </a>
+            )}
+          </div>
+        )
+      })}
+      {error && <p className="error">{error}</p>}
+    </div>
+  )
+}
+
+// /my/profile — 이름 · 휴대폰 · 개인통관고유부호 · 광고 수신 · 연결된 계정 · 탈퇴
 export function MyProfilePage() {
   const [p, setP] = useState(null)
+  const [socials, setSocials] = useState([])
+  const [providers, setProviders] = useState(null)
   const [msg, setMsg] = useState('')
   const [error, setError] = useState('')
   const [wpw, setWpw] = useState('')
+  const [wok, setWok] = useState(false) // 소셜만 가입한 회원의 탈퇴 확인
   useEffect(() => {
-    getProfile()
-      .then((d) => setP({ ...d, phone: d.phone || '', pccc: d.pccc || '' }))
+    getProfileFull()
+      .then((d) => {
+        setP({ ...d.member, phone: d.member.phone || '', pccc: d.member.pccc || '' })
+        setSocials(d.socials || [])
+        setProviders(d.providers || null)
+      })
       .catch((e) => setError(e.message))
   }, [])
   const set = (k) => (e) => setP({ ...p, [k]: k === 'pccc' ? e.target.value.toUpperCase() : e.target.value })
@@ -378,7 +441,7 @@ export function MyProfilePage() {
         <div className="fields">
           <label>
             이메일
-            <input value={p.email} readOnly />
+            <input value={p.email || '없음 (소셜로 가입)'} readOnly />
           </label>
           <label>
             이름
@@ -414,16 +477,23 @@ export function MyProfilePage() {
             저장
           </button>
           {msg && <p className="hint">{msg}</p>}
+          <SocialLinks socials={socials} providers={providers} onChange={setSocials} />
           <details className="withdraw">
             <summary>회원 탈퇴</summary>
             <p className="muted small">탈퇴하면 배송지와 회원정보가 지워져요. 주문 기록은 법에 따라 5년 보관해요.</p>
-            <input className="input" type="password" placeholder="비밀번호" value={wpw} onChange={(e) => setWpw(e.target.value)} />
+            {p.has_password ? (
+              <input className="input" type="password" placeholder="비밀번호" value={wpw} onChange={(e) => setWpw(e.target.value)} />
+            ) : (
+              <label className="check">
+                <input type="checkbox" checked={wok} onChange={(e) => setWok(e.target.checked)} /> 위 내용을 확인했고 탈퇴할게요
+              </label>
+            )}
             <button
               className="btn-line"
               onClick={async () => {
                 if (!window.confirm('정말 탈퇴할까요?')) return
                 try {
-                  await withdraw(wpw)
+                  await withdraw(wpw, wok)
                   navigate('/')
                 } catch (e) {
                   setError(e.message)
@@ -439,8 +509,57 @@ export function MyProfilePage() {
   )
 }
 
-// /my/password
+// /my/password — 소셜로만 가입한 회원(비밀번호 없음)은 '비밀번호 만들기' (이메일이 없으면 로그인용 이메일도)
 export function MyPasswordPage() {
+  const member = useMember()
+  if (member && member.has_password === false) return <MyPasswordCreate member={member} />
+  return <MyPasswordChange />
+}
+
+function MyPasswordCreate({ member }) {
+  const [f, setF] = useState({ email: '', next: '', next2: '' })
+  const [msg, setMsg] = useState('')
+  const [error, setError] = useState('')
+  return (
+    <MyLayout path="/my/password" title="비밀번호 만들기">
+      <form
+        className="fields"
+        onSubmit={async (e) => {
+          e.preventDefault()
+          setError('')
+          if (f.next !== f.next2) return setError('비밀번호가 서로 달라요')
+          try {
+            await createPassword(f.next, f.email)
+            setMsg('비밀번호를 만들었어요. 이제 이메일로도 로그인할 수 있어요.')
+          } catch (err) {
+            setError(err.message)
+          }
+        }}
+      >
+        <p className="muted small">카카오 · 네이버로 가입해서 아직 비밀번호가 없어요. 만들면 이메일로도 로그인할 수 있어요.</p>
+        {!member.email && (
+          <label>
+            로그인에 쓸 이메일
+            <input type="email" autoComplete="email" value={f.email} onChange={(e) => setF({ ...f, email: e.target.value })} required />
+          </label>
+        )}
+        <label>
+          비밀번호 (영문·숫자 8자 이상)
+          <input type="password" autoComplete="new-password" value={f.next} onChange={(e) => setF({ ...f, next: e.target.value })} />
+        </label>
+        <label>
+          비밀번호 확인
+          <input type="password" autoComplete="new-password" value={f.next2} onChange={(e) => setF({ ...f, next2: e.target.value })} />
+        </label>
+        {error && <p className="error">{error}</p>}
+        {msg && <p className="hint">{msg}</p>}
+        <button className="btn-black">만들기</button>
+      </form>
+    </MyLayout>
+  )
+}
+
+function MyPasswordChange() {
   const [f, setF] = useState({ current: '', next: '', next2: '' })
   const [msg, setMsg] = useState('')
   const [error, setError] = useState('')
