@@ -319,3 +319,24 @@ input[type='checkbox'] { accent-color: #000; }
 
 /* 결제 수단 — 카드(포트원 · KCP)는 한 줄 전체, 간편결제 둘은 아래 반반 (2026-10-29) */
 .pay-pick button.card { grid-column: 1 / -1; }
+
+/* 약관 동의 (components/Agreements) — 항목별 [필수]/[선택] · 내용 보기(그 자리에서 펼침) */
+.agree-item + .agree-item { border-top: 1px solid #f0f0f0; }
+.agree-row { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+.agree-row .check { flex: 1; margin-top: 10px; }
+.agree-req { font-weight: 600; color: var(--ink); }
+.agree-opt { color: var(--sub); }
+.agree-toggle { flex: none; margin-top: 10px; font-size: 12px; color: var(--sub); text-decoration: underline; text-underline-offset: 3px; }
+.agree-body { max-height: 240px; overflow-y: auto; margin: 10px 0 4px 24px; padding: 12px 14px; background: var(--bg-sub); font-size: 12px; line-height: 1.7; color: var(--sub); }
+.agree-body h2 { font-size: 13px; margin: 12px 0 4px; color: var(--ink); }
+.agree-body h2:first-child { margin-top: 0; }
+.agree-body p, .agree-body ul { margin: 6px 0; font-size: 12px; }
+.agree-body ul { padding-left: 18px; }
+.agree-table { width: 100%; border-collapse: collapse; background: #fff; }
+.agree-table th, .agree-table td { border: 1px solid var(--line); padding: 6px 8px; text-align: left; vertical-align: top; font-size: 12px; }
+.agree-table th { width: 88px; color: var(--ink); font-weight: 600; background: #fafafa; }
+.summary .agree .agree-box { margin-top: 0; }
+.steps { display: flex; gap: 8px; align-items: center; margin: -4px 0 16px; font-size: 13px; color: var(--mute); }
+.steps b { color: var(--ink); }
+.steps .link { font-size: 13px; color: var(--sub); text-decoration: underline; text-underline-offset: 3px; }
+.center { text-align: center; }

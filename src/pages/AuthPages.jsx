@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react'
 
+import { Agreements, emptyAgree, requiredOk } from '../components/Agreements'
 import { Page } from '../components/Layout'
 import { getProviders, login, signup, SOCIAL, socialComplete, socialPending, socialStartUrl } from '../lib/api'
 import { Link, navigate } from '../lib/router'
+import { SIGNUP_ITEMS } from './agreeTexts'
 
 // 카카오 · 네이버 로고 (각 사 디자인 가이드 — 카카오 #FEE500 말풍선 · 네이버 #03C75A N)
 function KakaoLogo() {
@@ -119,19 +121,19 @@ export function LoginPage({ query }) {
   )
 }
 
-// 회원가입 /signup — 이메일 · 비밀번호 · 이름 · 휴대폰(선택) + 필수 약관 3 · 광고 수신(선택)
+// 회원가입 /signup — 1단계 약관 동의(전체 동의 · 항목별 내용 보기) → 2단계 이메일 · 비밀번호 · 이름 · 휴대폰(선택) (2026-10-30)
 export function SignupPage({ query }) {
+  const [step, setStep] = useState('agree') // agree → form
   const [f, setF] = useState({ email: '', password: '', password2: '', name: '', phone: '' })
-  const [ag, setAg] = useState({ terms: false, privacy: false, age: false, marketing: false })
+  const [ag, setAg] = useState(emptyAgree(SIGNUP_ITEMS))
   const [error, setError] = useState('')
   const [busy, setBusy] = useState(false)
   const set = (k) => (e) => setF({ ...f, [k]: e.target.value })
-  const allOn = ag.terms && ag.privacy && ag.age && ag.marketing
   const submit = async (e) => {
     e.preventDefault()
     setError('')
     if (f.password !== f.password2) return setError('비밀번호가 서로 달라요')
-    if (!(ag.terms && ag.privacy && ag.age)) return setError('필수 약관에 모두 동의해 주세요')
+    if (!requiredOk(SIGNUP_ITEMS, ag)) return (setStep('agree'), setError('필수 약관에 모두 동의해 주세요'))
     setBusy(true)
     try {
       await signup({
@@ -150,38 +152,45 @@ export function SignupPage({ query }) {
       setBusy(false)
     }
   }
-  const box = (k, label, link) => (
-    <label className="check">
-      <input type="checkbox" checked={ag[k]} onChange={(e) => setAg({ ...ag, [k]: e.target.checked })} />
-      <span>
-        {label} {link && <Link to={link}>보기</Link>}
-      </span>
-    </label>
-  )
+  if (step === 'agree')
+    return (
+      <Page narrow>
+        <div className="auth">
+          <h1>회원가입</h1>
+          <p className="steps">
+            <b>1. 약관 동의</b> <span>›</span> 2. 정보 입력
+          </p>
+          <Agreements items={SIGNUP_ITEMS} value={ag} onChange={(v) => (setAg(v), setError(''))} />
+          {error && <p className="error">{error}</p>}
+          <button
+            className="btn-black"
+            type="button"
+            onClick={() => (requiredOk(SIGNUP_ITEMS, ag) ? (setStep('form'), setError('')) : setError('필수 항목에 모두 동의해 주세요'))}
+          >
+            동의하고 계속
+          </button>
+          <p className="muted center">카카오 · 네이버로 가입해도 약관 동의를 한 번 더 받아요.</p>
+          <SocialButtons next={safeNext(query)} />
+          <p className="auth-links">
+            이미 회원이세요? <Link to={`/login?next=${encodeURIComponent(safeNext(query))}`}>로그인</Link>
+          </p>
+        </div>
+      </Page>
+    )
   return (
     <Page narrow>
       <form className="auth" onSubmit={submit}>
         <h1>회원가입</h1>
-        <SocialButtons next={safeNext(query)} />
-        <input className="input" type="email" autoComplete="email" placeholder="이메일" value={f.email} onChange={set('email')} required />
+        <p className="steps">
+          <button type="button" className="link" onClick={() => setStep('agree')}>
+            1. 약관 동의 ✓
+          </button>{' '}
+          <span>›</span> <b>2. 정보 입력</b>
+        </p>        <input className="input" type="email" autoComplete="email" placeholder="이메일" value={f.email} onChange={set('email')} required />
         <input className="input" type="password" autoComplete="new-password" placeholder="비밀번호 (영문·숫자 8자 이상)" value={f.password} onChange={set('password')} required />
         <input className="input" type="password" autoComplete="new-password" placeholder="비밀번호 확인" value={f.password2} onChange={set('password2')} required />
         <input className="input" autoComplete="name" placeholder="이름" value={f.name} onChange={set('name')} required maxLength={50} />
         <input className="input" type="tel" autoComplete="tel" placeholder="휴대폰 (선택)" value={f.phone} onChange={set('phone')} />
-        <div className="agree-box">
-          <label className="check all">
-            <input
-              type="checkbox"
-              checked={allOn}
-              onChange={(e) => setAg({ terms: e.target.checked, privacy: e.target.checked, age: e.target.checked, marketing: e.target.checked })}
-            />
-            <b>전체 동의</b>
-          </label>
-          {box('terms', '(필수) 이용약관', '/terms')}
-          {box('privacy', '(필수) 개인정보 수집 · 이용', '/privacy')}
-          {box('age', '(필수) 만 14세 이상이에요')}
-          {box('marketing', '(선택) 할인 · 이벤트 소식 받기')}
-        </div>
         {error && <p className="error">{error}</p>}
         <button className="btn-black" disabled={busy}>
           {busy ? '가입 중…' : '가입하기'}
@@ -199,7 +208,7 @@ export function SignupPage({ query }) {
 export function SocialSignupPage() {
   const [pd, setPd] = useState(undefined) // undefined 확인 중 · null 없음
   const [f, setF] = useState({ name: '', phone: '' })
-  const [ag, setAg] = useState({ terms: false, privacy: false, age: false, marketing: false })
+  const [ag, setAg] = useState(emptyAgree(SIGNUP_ITEMS))
   const [error, setError] = useState('')
   const [busy, setBusy] = useState(false)
   useEffect(() => {
@@ -210,15 +219,6 @@ export function SocialSignupPage() {
       })
       .catch(() => setPd(null))
   }, [])
-  const allOn = ag.terms && ag.privacy && ag.age && ag.marketing
-  const box = (k, label, link) => (
-    <label className="check">
-      <input type="checkbox" checked={ag[k]} onChange={(e) => setAg({ ...ag, [k]: e.target.checked })} />
-      <span>
-        {label} {link && <Link to={link}>보기</Link>}
-      </span>
-    </label>
-  )
   if (pd === undefined) return <Page narrow />
   if (pd === null)
     return (
@@ -236,7 +236,7 @@ export function SocialSignupPage() {
   const submit = async (e) => {
     e.preventDefault()
     setError('')
-    if (!(ag.terms && ag.privacy && ag.age)) return setError('필수 약관에 모두 동의해 주세요')
+    if (!requiredOk(SIGNUP_ITEMS, ag)) return setError('필수 약관에 모두 동의해 주세요')
     setBusy(true)
     try {
       const d = await socialComplete({
@@ -262,20 +262,7 @@ export function SocialSignupPage() {
         </p>
         <input className="input" autoComplete="name" placeholder="이름" value={f.name} onChange={(e) => setF({ ...f, name: e.target.value })} required maxLength={50} />
         <input className="input" type="tel" autoComplete="tel" placeholder="휴대폰 (선택)" value={f.phone} onChange={(e) => setF({ ...f, phone: e.target.value })} />
-        <div className="agree-box">
-          <label className="check all">
-            <input
-              type="checkbox"
-              checked={allOn}
-              onChange={(e) => setAg({ terms: e.target.checked, privacy: e.target.checked, age: e.target.checked, marketing: e.target.checked })}
-            />
-            <b>전체 동의</b>
-          </label>
-          {box('terms', '(필수) 이용약관', '/terms')}
-          {box('privacy', '(필수) 개인정보 수집 · 이용', '/privacy')}
-          {box('age', '(필수) 만 14세 이상이에요')}
-          {box('marketing', '(선택) 할인 · 이벤트 소식 받기')}
-        </div>
+        <Agreements items={SIGNUP_ITEMS} value={ag} onChange={(v) => (setAg(v), setError(''))} />
         {error && <p className="error">{error}</p>}
         <button className="btn-black" disabled={busy}>
           {busy ? '가입 중…' : '가입 마치기'}

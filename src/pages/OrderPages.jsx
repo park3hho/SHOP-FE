@@ -1,10 +1,12 @@
 import { useEffect, useMemo, useState } from 'react'
 
+import { Agreements, emptyAgree, requiredOk } from '../components/Agreements'
 import { Page } from '../components/Layout'
 import { getProfile, kst, listAddresses, myOrder, PAY_METHOD, PROGRESS, useMember, won } from '../lib/api'
 import { clearCart, getBuyNow, removeFromCart, setBuyNow, setQty, useCart } from '../lib/cart'
 import { createOrder, getOrder, getPayConfig, payWithCard, payWithKakao, payWithNaver } from '../lib/payments'
 import { Link, navigate } from '../lib/router'
+import { ORDER_ITEMS } from './agreeTexts'
 import { Qty } from './ProductPages'
 
 const sum = (lines) => lines.reduce((s, l) => s + l.price * l.qty, 0)
@@ -172,7 +174,7 @@ export function CheckoutPage() {
   const [savePccc, setSavePccc] = useState(true)
   const [pay, setPay] = useState('')
   const [cfg, setCfg] = useState(null)
-  const [agree, setAgree] = useState(false)
+  const [agree, setAgree] = useState(emptyAgree(ORDER_ITEMS)) // 구매 진행 · 제3자 제공 · 국외 이전 (모두 필수)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
 
@@ -211,7 +213,7 @@ export function CheckoutPage() {
   const submit = async () => {
     setError('')
     if (!pay) return setError('결제 수단을 골라 주세요')
-    if (!agree) return setError('주문 내용과 해외구매대행 안내에 동의해 주세요')
+    if (!requiredOk(ORDER_ITEMS, agree)) return setError('주문 동의 항목에 모두 동의해 주세요')
     setBusy(true)
     try {
       const order = await createOrder(
@@ -346,13 +348,9 @@ export function CheckoutPage() {
             <span>최종 결제 금액</span>
             <b>{won(total)}</b>
           </div>
-          <label className="check agree">
-            <input type="checkbox" checked={agree} onChange={(e) => setAgree(e.target.checked)} />
-            <span>
-              주문 내용을 확인했고, 해외구매대행 상품으로 받는 분 이름의 개인통관고유부호로 통관하는 데 동의해요.{' '}
-              <Link to="/guide">안내 보기</Link> · <Link to="/policy">배송 · 교환 · 환불 정책</Link>
-            </span>
-          </label>
+          <div className="agree">
+            <Agreements items={ORDER_ITEMS} value={agree} onChange={(v) => (setAgree(v), setError(''))} allLabel="주문 내용 확인 · 전체 동의" />
+          </div>
           {error && <p className="error">{error}</p>}
           <button className="btn-black" disabled={busy} onClick={submit}>
             {busy ? '결제창 여는 중…' : `${won(total)} 결제하기`}
