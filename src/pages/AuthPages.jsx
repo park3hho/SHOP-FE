@@ -26,7 +26,7 @@ function NaverLogo() {
 }
 
 // "카카오로 시작하기" · "네이버로 시작하기" — 키가 아직 없는 곳은 눌러도 '준비 중' 안내
-export function SocialButtons({ next = '/my' }) {
+export function SocialButtons({ next = '/my', divider = true }) {
   const [ready, setReady] = useState(null)
   useEffect(() => {
     getProviders()
@@ -52,9 +52,11 @@ export function SocialButtons({ next = '/my' }) {
           로그인은 준비 중이에요
         </p>
       )}
-      <div className="or-line">
-        <span>또는 이메일로</span>
-      </div>
+      {divider && (
+        <div className="or-line">
+          <span>또는 이메일로</span>
+        </div>
+      )}
     </div>
   )
 }
@@ -170,7 +172,7 @@ export function SignupPage({ query }) {
             동의하고 계속
           </button>
           <p className="muted center">카카오 · 네이버로 가입해도 약관 동의를 한 번 더 받아요.</p>
-          <SocialButtons next={safeNext(query)} />
+          <SocialButtons next={safeNext(query)} divider={false} />
           <p className="auth-links">
             이미 회원이세요? <Link to={`/login?next=${encodeURIComponent(safeNext(query))}`}>로그인</Link>
           </p>
