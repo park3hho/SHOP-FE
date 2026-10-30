@@ -94,8 +94,69 @@ function useLiveData() {
   }, [])
   return lists || Object.fromEntries(LISTS.map((k) => [k, []]))
 }
+// NEW · TEA — 차(찻잎 · 티백)가 들어왔다는 걸 Today 에서 보여 주는 띠 (2026-10-30 사용자: "차 들어온 거 표현, CHAGEE")
+//   상품은 자사몰에서 지금 파는 CHAGEE 차만 (분류 tea + 이름 '차지'). 하나도 없으면 띠를 숨긴다.
+const TEA_HERO = 'PR-261029-0027' // 띠 왼쪽 큰 사진 = 이 상품의 대표이미지(연출컷). 안 팔면 첫 상품
+
+function useChagee() {
+  const [items, setItems] = useState([])
+  useEffect(() => {
+    listProducts('차지', 1, 8, { cat: 'tea' })
+      .then((r) => setItems(r.items))
+      .catch(() => setItems([]))
+  }, [])
+  return items
+}
+
+// '[냉침 티백] 차지(CHAGEE) 과일칩 냉침차 + 티백 세트' → { form: '냉침 티백', name: '과일칩 냉침차 + 티백 세트' }
+const teaName = (name) => {
+  const m = name.match(/^\[([^\]]+)\]\s*(.*)$/)
+  const rest = (m ? m[2] : name).replace(/^차지\(CHAGEE\)\s*/, '')
+  return { form: m ? m[1] : '', name: rest }
+}
+
+function TeaBand({ items }) {
+  if (!items.length) return null
+  const hero = items.find((p) => p.code === TEA_HERO) || items[0]
+  return (
+    <section className="tea-band">
+      <Link className="tea-band-img" to={`/products/${hero.code}`} style={{ backgroundImage: `url(${hero.img})` }} aria-label={hero.name} />
+      <div className="tea-band-body">
+        <p className="tea-eyebrow">NEW · TEA</p>
+        <h2>
+          CHAGEE <span className="cn">霸王茶姬</span>
+          <br />
+          이제 집에서 우려 마셔요
+        </h2>
+        <p className="tea-lead">
+          윈난에서 시작한 중국 대표 차 브랜드, 차지(CHAGEE). 매장에서 쓰는 원엽차를 한 잔씩 우리는 티백으로 들여왔어요. 장미 보이차부터 우롱, 냉침 과일차까지.
+        </p>
+        <div className="tea-cards">
+          {items.slice(0, 4).map((p) => {
+            const n = teaName(p.name)
+            return (
+              <Link className="tea-card" to={`/products/${p.code}`} key={p.code}>
+                <div className="tea-card-img">
+                  <img src={p.img} alt="" loading="lazy" />
+                  {p.img_hover && <img className="hover" src={p.img_hover} alt="" loading="lazy" />}
+                </div>
+                {n.form && <div className="tea-form">{n.form}</div>}
+                <div className="name">{n.name}</div>
+                <div className="price">{p.price ? `${won(p.price)}원~` : ''}</div>
+              </Link>
+            )
+          })}
+        </div>
+        <Link className="tea-more" to="/products?cat=tea">
+          Tea 전체 보기 →
+        </Link>
+      </div>
+    </section>
+  )
+}
 export default function App({ Header, Footer }) {
   const live = useLiveData()
+  const chagee = useChagee()
   const best = live.best
   return (
     <>
@@ -115,6 +176,8 @@ export default function App({ Header, Footer }) {
           <Story img="/img/milktea.jpg" title="밀크티, 홍콩식부터 소금 밀크티까지" sub="한국 편의점엔 없는 밀크티만 모았어요." items={live.milktea} />
         </div>
       </main>
+
+      <TeaBand items={chagee} />
 
       <section className="best">
         <div className="best-head">
