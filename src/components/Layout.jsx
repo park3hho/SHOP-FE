@@ -208,6 +208,7 @@ export function Footer() {
         <Link to="/privacy">
           <b>개인정보처리방침</b>
         </Link>
+        <Link to="/policy">배송 · 교환 · 환불</Link>
         <Link to="/guide">해외구매대행 안내</Link>
       </nav>
       <p>

@@ -350,7 +350,7 @@ export function CheckoutPage() {
             <input type="checkbox" checked={agree} onChange={(e) => setAgree(e.target.checked)} />
             <span>
               주문 내용을 확인했고, 해외구매대행 상품으로 받는 분 이름의 개인통관고유부호로 통관하는 데 동의해요.{' '}
-              <Link to="/guide">안내 보기</Link>
+              <Link to="/guide">안내 보기</Link> · <Link to="/policy">배송 · 교환 · 환불 정책</Link>
             </span>
           </label>
           {error && <p className="error">{error}</p>}

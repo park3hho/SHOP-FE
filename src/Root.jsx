@@ -2,7 +2,7 @@ import App from './App.jsx'
 import { Footer, Header } from './components/Layout'
 import { match, useLocation } from './lib/router'
 import { LoginPage, SignupPage, SocialSignupPage } from './pages/AuthPages'
-import { GuidePage, PrivacyPage, StoryPage, TermsPage } from './pages/InfoPages'
+import { GuidePage, PolicyPage, PrivacyPage, StoryPage, TermsPage } from './pages/InfoPages'
 import {
   MyAddressesPage,
   MyHomePage,
@@ -41,6 +41,7 @@ export default function Root() {
   if (path === '/terms') return <TermsPage />
   if (path === '/privacy') return <PrivacyPage />
   if (path === '/guide') return <GuidePage />
+  if (path === '/policy') return <PolicyPage />
   return (
     <>
       <Header />

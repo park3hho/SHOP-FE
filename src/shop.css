@@ -213,6 +213,18 @@
 .doc h1 { font-size: 28px; }
 .doc h2 { font-size: 16px; margin: 28px 0 8px; }
 .doc p { font-size: 14px; line-height: 1.8; color: var(--sub); }
+/* 정책 문서 표 · 목록 (배송 · 교환 · 환불 정책) */
+.doc ul, .doc ol { margin: 0 0 8px; padding-left: 20px; font-size: 14px; line-height: 1.8; color: var(--sub); }
+.doc li + li { margin-top: 2px; }
+.doc b { color: var(--ink); }
+.doc .muted { font-size: 12px; color: var(--mute); margin: -4px 0 16px; }
+.doc-table { width: 100%; border-collapse: collapse; margin: 4px 0 8px; font-size: 14px; line-height: 1.7; }
+.doc-table th, .doc-table td { padding: 12px 14px; border-top: 1px solid var(--line); vertical-align: top; text-align: left; }
+.doc-table tr:last-child th, .doc-table tr:last-child td { border-bottom: 1px solid var(--line); }
+.doc-table th { width: 150px; background: var(--bg-sub); color: var(--ink); font-weight: 600; }
+.doc-table td { color: var(--sub); }
+.doc-table td ul { margin: 4px 0; }
+@media (max-width: 640px) { .doc-table th, .doc-table td { display: block; width: auto; } .doc-table td { border-top: 0; padding-top: 4px; } }
 
 @media (max-width: 900px) {
   .page { padding: 24px 16px 64px; }
