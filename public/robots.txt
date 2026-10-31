@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+Disallow: /my
+Disallow: /order/
+Disallow: /pay/
+Disallow: /api/
+
+Sitemap: https://www.eidofood.com/sitemap.xml
