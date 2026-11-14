@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from 'react'
 import { Page } from '../components/Layout'
 import { getProduct, listProducts, useCategories, useMember, won } from '../lib/api'
 import { addToCart, setBuyNow } from '../lib/cart'
+import { track } from '../lib/track'
 import { Link, navigate } from '../lib/router'
 
 // 상품 목록 /products?q=&cat=&sub=&form= — 4열 그리드 (29CM 카테고리 목록처럼 사진 크게, 글자는 아래 3줄)
@@ -168,6 +169,7 @@ export function ProductDetailPage({ code }) {
       .then((d) => {
         setP(d)
         setSku(d.options.length === 1 ? d.options[0].sku : '')
+        track('product_view', { code })
       })
       .catch((e) => setError(e.message))
   }, [code])
@@ -247,6 +249,7 @@ export function ProductDetailPage({ code }) {
               onClick={() => {
                 if (!need()) return
                 addToCart(line())
+                track('add_to_cart', { code: p.code, value: opt.price * qty })
                 setMsg('장바구니에 담았어요')
               }}
             >
@@ -257,6 +260,7 @@ export function ProductDetailPage({ code }) {
               onClick={() => {
                 if (!need()) return
                 setBuyNow([line()])
+                track('add_to_cart', { code: p.code, value: opt.price * qty })
                 navigate(member ? '/order/checkout?buy=now' : '/login?next=' + encodeURIComponent('/order/checkout?buy=now'))
               }}
             >

@@ -1,6 +1,9 @@
+import { useEffect } from 'react'
+
 import App from './App.jsx'
 import { Footer, Header } from './components/Layout'
 import { match, useLocation } from './lib/router'
+import { trackPage } from './lib/track'
 import { LoginPage, SignupPage, SocialSignupPage } from './pages/AuthPages'
 import { GuidePage, PolicyPage, PrivacyPage, StoryPage, TermsPage } from './pages/InfoPages'
 import {
@@ -19,6 +22,10 @@ import './shop.css'
 // 경로 → 화면. 목록은 docs/shop-pages.md
 export default function Root() {
   const { path, query } = useLocation()
+  // 방문 기록 — 화면이 바뀔 때마다 한 번 (자사 분석도구). 결제 돌아오는 주소(/pay/…)는 세지 않는다
+  useEffect(() => {
+    if (!path.startsWith('/pay')) trackPage(path)
+  }, [path])
   let m
   // 메인 = Today (기획 큐레이션). Story 는 MKT 팀 글이 올라갈 자리 (지금은 준비 중 화면)
   if (path === '/') return <App Header={Header} Footer={Footer} />

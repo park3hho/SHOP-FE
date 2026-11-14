@@ -5,6 +5,7 @@ import { Page } from '../components/Layout'
 import { getProfile, kst, listAddresses, myOrder, PAY_METHOD, PROGRESS, useMember, won } from '../lib/api'
 import { clearCart, getBuyNow, removeFromCart, setBuyNow, setQty, useCart } from '../lib/cart'
 import { createOrder, getOrder, getPayConfig, payWithCard, payWithKakao, payWithNaver } from '../lib/payments'
+import { track } from '../lib/track'
 import { Link, navigate } from '../lib/router'
 import { ORDER_ITEMS } from './agreeTexts'
 import { Qty } from './ProductPages'
@@ -215,6 +216,7 @@ export function CheckoutPage() {
     if (!pay) return setError('결제 수단을 골라 주세요')
     if (!requiredOk(ORDER_ITEMS, agree)) return setError('주문 동의 항목에 모두 동의해 주세요')
     setBusy(true)
+    track('begin_checkout', { value: total })
     try {
       const order = await createOrder(
         lines.map((l) => ({ sku: l.sku, qty: l.qty })),
@@ -379,7 +381,14 @@ export function OrderCompletePage({ query }) {
     // 주문한 브라우저(token) 먼저, 안 되면 회원 주문으로 — 비회원 · 시험 상품 주문도 보이게
     getOrder(code)
       .catch(() => myOrder(code))
-      .then(setO)
+      .then((d) => {
+        setO(d)
+        // 결제 완료 기록 — 같은 주문은 이 브라우저에서 한 번만
+        if (d && ['paid', 'ordered'].includes(d.status || 'paid') && !sessionStorage.getItem(`shop.tracked.${code}`)) {
+          sessionStorage.setItem(`shop.tracked.${code}`, '1')
+          track('purchase', { order: code, value: d.total_amount })
+        }
+      })
       .catch((e) => setError(e.message))
   }, [code])
   if (error)
