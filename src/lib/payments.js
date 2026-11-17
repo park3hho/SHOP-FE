@@ -39,8 +39,8 @@ export const getProducts = async () => (await call('/products')).items
 
 /** 쓸 수 있는 결제수단 → { kakao, naver, card: { enabled, test } (신용·체크카드 = 포트원 · KCP) } */
 export const getPayConfig = async () => {
-  const { kakao, naver, card } = await call('/payments/config')
-  return { kakao, naver, card: card || { enabled: false, test: true } }
+  const { kakao, naver, card, live } = await call('/payments/config')
+  return { live: !!live, kakao, naver, card: card || { enabled: false, test: true } }
 }
 
 /** 주문 만들기 — items: [{ sku, qty }] → order { code, total_amount, status, … }
@@ -186,3 +186,7 @@ export const cancelTestPayment = async (code) =>
 
 /** 다 끝난 주문의 token 을 지운다 (선택) */
 export const forgetOrder = (code) => localStorage.removeItem(KEY(code))
+
+// 오픈 여부 — 한 번 받아 모든 화면이 같이 쓴다 (위쪽 '개발 중' 안내)
+let livePromise = null
+export const getLive = () => (livePromise ||= getPayConfig().then((c) => c.live).catch(() => false))

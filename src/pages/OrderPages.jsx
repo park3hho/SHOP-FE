@@ -328,7 +328,9 @@ export function CheckoutPage() {
                 ['card', '신용·체크카드'],
                 ['kakao', '카카오페이'],
                 ['naver', '네이버페이'],
-              ].map(([k, label]) => (
+              ]
+                .filter(([k]) => !cfg?.live || cfg?.[k]?.enabled) // 오픈 뒤엔 못 쓰는 결제수단은 숨김
+                .map(([k, label]) => (
                 <button key={k} className={`${pay === k ? 'on' : ''} ${k}`} disabled={!cfg?.[k]?.enabled} onClick={() => setPay(k)}>
                   {label}
                 </button>

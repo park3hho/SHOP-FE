@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react'
 import { useCategories, useMember } from '../lib/api'
 import { useCart } from '../lib/cart'
 import { Link, navigate, useLocation } from '../lib/router'
+import { getLive } from '../lib/payments'
 
 // 서버 응답 전 잠깐 보이는 메뉴 (자리 흔들림 방지)
 const FALLBACK = [
@@ -63,6 +64,11 @@ function MegaColumn({ c, onGo }) {
 //   분류 메뉴 = 메가 메뉴 (2026-10-29 사용자 A안): 둘째 줄엔 DRINK · TEA 만, 마우스를 올리면 아래로 넓은 판.
 //   모바일은 ☰ → 전체 화면 메뉴 (DRINK/TEA 탭 + 사진 달린 소분류 목록)
 export function Header() {
+  // 오픈 전이면 위쪽 '개발 중' 안내 (서버 SHOP_LIVE · 카드 실결제로 정한다)
+  const [live, setLive] = useState(null)
+  useEffect(() => {
+    getLive().then(setLive)
+  }, [])
   const member = useMember()
   const cart = useCart()
   const cats = useCategories() || FALLBACK
@@ -86,7 +92,7 @@ export function Header() {
   const tabCat = cats.find((c) => c.code === tab) || cats[0]
   return (
     <>
-      <div className="notice">사이트 개발 중이에요 · 지금은 실제로 결제되지 않아요</div>
+      {live === false && <div className="notice">사이트 개발 중이에요 · 지금은 실제로 결제되지 않아요</div>}
       <header className="header" onMouseLeave={() => setMega(null)}>
         <Link className="logo" to="/">
           EIDOFOOD
