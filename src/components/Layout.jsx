@@ -86,7 +86,7 @@ export function Header() {
   const tabCat = cats.find((c) => c.code === tab) || cats[0]
   return (
     <>
-      <div className="notice">오픈 준비 중이에요 · 결제는 테스트 결제라 실제로 돈이 나가지 않아요</div>
+      <div className="notice">사이트 개발 중이에요 · 지금은 실제로 결제되지 않아요</div>
       <header className="header" onMouseLeave={() => setMega(null)}>
         <Link className="logo" to="/">
           EIDOFOOD

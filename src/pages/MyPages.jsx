@@ -190,7 +190,7 @@ export function MyOrderPage({ code }) {
         <>
           <p className="muted">
             {kst(o.created_at)} 주문 · {o.code}
-            {o.test ? ' · 테스트 결제' : ''}
+            {o.test ? ' · 개발 중 주문' : ''}
           </p>
           {o.progress === 'cancelled' ? (
             <p className="cancel-note">주문이 취소됐어요 ({kst(o.cancelled_at)}) — 결제 금액은 결제수단으로 돌려드렸어요.</p>

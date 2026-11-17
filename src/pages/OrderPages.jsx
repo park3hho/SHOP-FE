@@ -334,7 +334,7 @@ export function CheckoutPage() {
                 </button>
               ))}
             </div>
-            {cfg && cfg[pay]?.test && <p className="muted small">테스트 결제예요 — 실제로 돈이 나가지 않아요.</p>}
+            {cfg && cfg[pay]?.test && <p className="muted small">개발 중이라 실제로 결제되지 않아요.</p>}
           </section>
         </div>
 
@@ -452,7 +452,7 @@ function OrderDone({ o }) {
           >
             주문번호 <b>{o.code}</b> <span className="muted">{copied ? '복사했어요' : '복사'}</span>
           </button>
-          {o.test && <p className="od-test">테스트 결제예요 — 실제로 돈이 나가지 않았어요</p>}
+          {o.test && <p className="od-test">개발 중이라 실제로 결제되지 않았어요</p>}
         </section>
 
         {paid && d && (
