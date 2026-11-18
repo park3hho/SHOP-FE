@@ -1,6 +1,7 @@
 {
   "rewrites": [
     { "source": "/api/shop/:path*", "destination": "https://api.eidofood.com/shop/:path*" },
+    { "source": "/sitemap.xml", "destination": "https://api.eidofood.com/shop/sitemap.xml" },
     { "source": "/(.*)", "destination": "/index.html" }
   ]
 }

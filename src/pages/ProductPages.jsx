@@ -4,6 +4,7 @@ import { Page } from '../components/Layout'
 import { getProduct, listProducts, useCategories, useMember, won } from '../lib/api'
 import { addToCart, setBuyNow } from '../lib/cart'
 import { track } from '../lib/track'
+import { setMeta } from '../lib/meta'
 import { Link, navigate } from '../lib/router'
 
 // 상품 목록 /products?q=&cat=&sub=&form= — 4열 그리드 (29CM 카테고리 목록처럼 사진 크게, 글자는 아래 3줄)
@@ -34,6 +35,11 @@ export function ProductListPage({ query }) {
     : c
       ? c.sub.find((s) => s.code === sub)?.label || c.forms.find((f) => f.code === form)?.label || c.label
       : '전체 상품'
+  // 검색 결과 제목 — 분류·검색 목록은 그 이름으로 (2026-11-18)
+  useEffect(() => {
+    if (q || c) setMeta(title.replace(/[‘’]/g, ''))
+    return () => setMeta()
+  }, [title]) // eslint-disable-line react-hooks/exhaustive-deps
   const href = (o) => {
     const p = new URLSearchParams()
     for (const [k, v] of Object.entries({ q, cat, sub, form, ...o })) if (v && !(k === 'page' && v === 1)) p.set(k, v)
@@ -170,9 +176,16 @@ export function ProductDetailPage({ code }) {
         setP(d)
         setSku(d.options.length === 1 ? d.options[0].sku : '')
         track('product_view', { code })
+        const prices = d.options.map((o) => o.price).filter(Boolean)
+        const low = prices.length ? Math.min(...prices) : null
+        setMeta(
+          d.name,
+          `${d.name} (${d.name_cn})${low ? ` · ${low.toLocaleString('ko-KR')}원부터` : ''} · 무료배송 해외구매대행. 현지 그 맛 그대로, EIDOFOOD 이도식품.`,
+        )
       })
       .catch((e) => setError(e.message))
   }, [code])
+  useEffect(() => () => setMeta(), [])
 
   if (error)
     return (
