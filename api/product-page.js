@@ -73,7 +73,7 @@ function headFor(p, url) {
               '@type': 'MerchantReturnPolicy',
               applicableCountry: 'KR',
               returnPolicyCategory: 'https://schema.org/MerchantReturnFiniteReturnWindow',
-              merchantReturnDays: 7,
+              merchantReturnDays: 10, // 정책(/policy) 받은 날부터 10일
               returnFees: 'https://schema.org/ReturnFeesCustomerResponsibility',
               returnMethod: 'https://schema.org/ReturnByMail',
             },
