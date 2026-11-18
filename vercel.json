@@ -2,6 +2,8 @@
   "rewrites": [
     { "source": "/api/shop/:path*", "destination": "https://api.eidofood.com/shop/:path*" },
     { "source": "/sitemap.xml", "destination": "https://api.eidofood.com/shop/sitemap.xml" },
+    { "source": "/feeds/google.xml", "destination": "https://api.eidofood.com/shop/feeds/google.xml" },
+    { "source": "/products/:code", "destination": "/api/product-page?code=:code" },
     { "source": "/(.*)", "destination": "/index.html" }
   ]
 }

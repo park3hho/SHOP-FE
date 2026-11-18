@@ -3,6 +3,7 @@ import { useEffect } from 'react'
 import App from './App.jsx'
 import { Footer, Header } from './components/Layout'
 import { match, useLocation } from './lib/router'
+import { setCanonical } from './lib/meta'
 import { trackPage } from './lib/track'
 import { LoginPage, SignupPage, SocialSignupPage } from './pages/AuthPages'
 import { GuidePage, PolicyPage, PrivacyPage, StoryPage, TermsPage } from './pages/InfoPages'
@@ -26,6 +27,7 @@ export default function Root() {
   useEffect(() => {
     if (!path.startsWith('/pay')) trackPage(path)
   }, [path])
+  useEffect(() => setCanonical(path, query), [path, query])
   let m
   // 메인 = Today (기획 큐레이션). Story 는 MKT 팀 글이 올라갈 자리 (지금은 준비 중 화면)
   if (path === '/') return <App Header={Header} Footer={Footer} />

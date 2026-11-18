@@ -340,3 +340,13 @@ input[type='checkbox'] { accent-color: #000; }
 .steps b { color: var(--ink); }
 .steps .link { font-size: 13px; color: var(--sub); text-decoration: underline; text-underline-offset: 3px; }
 .center { text-align: center; }
+
+/* 상품 정보 탭 › 상품 소개 (상세페이지 문구를 글자로, 2026-11-18) */
+.pd-intro { max-width: 860px; margin: 8px auto 28px; font-size: 14px; line-height: 1.75; color: var(--sub); }
+.pd-intro h2 { margin: 0 0 8px; font-size: 22px; line-height: 1.35; color: var(--ink); letter-spacing: -0.02em; }
+.pd-intro h3 { margin: 22px 0 6px; font-size: 15px; color: var(--ink); }
+.pd-intro-eyebrow { margin: 0 0 6px; font-size: 12px; font-weight: 700; color: var(--accent); }
+.pd-intro ul { margin: 8px 0 0; padding-left: 18px; }
+.pd-intro b { color: var(--ink); }
+.pd-intro .cn { color: var(--mute); }
+

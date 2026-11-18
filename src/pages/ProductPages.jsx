@@ -321,6 +321,49 @@ export function ProductDetailPage({ code }) {
           )}
         </div>
       )}
+      {tab === 'info' && p.intro?.headline && (
+        // 상품 소개 — 승인된 상세페이지 문구를 글자로 (검색엔진 · 화면 읽기 프로그램이 읽을 수 있게, 2026-11-18)
+        <section className="pd-intro">
+          {p.intro.eyebrow && <p className="pd-intro-eyebrow">{p.intro.eyebrow}</p>}
+          <h2>{p.intro.headline}</h2>
+          {p.intro.lead && <p>{p.intro.lead}</p>}
+          {p.intro.points.length > 0 && (
+            <ul>
+              {p.intro.points.map((x) => (
+                <li key={x.title}>
+                  <b>{x.title}</b> {x.desc}
+                </li>
+              ))}
+            </ul>
+          )}
+          {p.intro.flavors.length > 0 && (
+            <>
+              <h3>맛 고르기</h3>
+              {p.intro.flavors_lead && <p>{p.intro.flavors_lead}</p>}
+              <ul>
+                {p.intro.flavors.map((x) => (
+                  <li key={x.name}>
+                    <b>{x.name}</b>
+                    {x.name_cn && <span className="cn"> {x.name_cn}</span>} — {x.desc}
+                  </li>
+                ))}
+              </ul>
+            </>
+          )}
+          {p.intro.howto.length > 0 && (
+            <>
+              <h3>이렇게 드세요</h3>
+              <ul>
+                {p.intro.howto.map((x) => (
+                  <li key={x.title}>
+                    <b>{x.title}</b> {x.desc}
+                  </li>
+                ))}
+              </ul>
+            </>
+          )}
+        </section>
+      )}
       {tab === 'info' && (
         <dl className="kv">
           <dt>상품명</dt>
