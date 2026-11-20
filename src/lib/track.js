@@ -6,6 +6,21 @@ const URL_ = '/api/shop/track'
 const V_KEY = 'shop.vid'
 const S_KEY = 'shop.sid'
 const IDLE_MS = 30 * 60 * 1000
+// 직원 기기 (2026-11-20) — 우리 휴대폰·PC 는 방문 기록을 아예 보내지 않는다 (로그인 안 해도 손님 수에서 빠지게).
+//   켜기: 그 기기에서 https://www.eidofood.com/?eido_staff=1 한 번 열기 · 끄기: ?eido_staff=0
+const STAFF_KEY = 'shop.staff'
+const STAFF_PARAM = 'eido_staff'
+
+function isStaff() {
+  try {
+    const q = new URLSearchParams(window.location.search).get(STAFF_PARAM)
+    if (q === '1') localStorage.setItem(STAFF_KEY, '1')
+    else if (q === '0') localStorage.removeItem(STAFF_KEY)
+    return localStorage.getItem(STAFF_KEY) === '1'
+  } catch {
+    return false
+  }
+}
 
 const uid = () =>
   (crypto.randomUUID && crypto.randomUUID()) ||
@@ -60,6 +75,7 @@ function send(body) {
 // type: page_view · product_view · add_to_cart · begin_checkout · purchase
 export function track(type, extra = {}) {
   if (typeof window === 'undefined') return
+  if (isStaff()) return
   const s = session()
   send({
     t: type,
