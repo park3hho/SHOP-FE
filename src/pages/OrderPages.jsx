@@ -162,6 +162,10 @@ export function AddressFields({ value, onChange }) {
   )
 }
 
+// KCP 결제창 간편결제 — 고객이 카카오페이·네이버페이·토스페이 앱에 저장해 둔 카드로 결제 (2026-11-24)
+const EASY = { kcp_kakao: 'KAKAOPAY', kcp_naver: 'NAVERPAY', kcp_toss: 'TOSSPAY' }
+const payOn = (cfg, k) => (EASY[k] ? !!cfg?.card?.enabled : !!cfg?.[k]?.enabled)
+
 // 주문서 /order/checkout — 주문 상품 · 배송지 · 개인통관고유부호 · 결제수단 · 동의 → 결제
 export function CheckoutPage() {
   const member = useMember()
@@ -231,9 +235,9 @@ export function CheckoutPage() {
       )
       sessionStorage.setItem('shop.checkoutFrom', new URLSearchParams(window.location.search).get('buy') || '')
       sessionStorage.setItem('shop.checkoutSkus', JSON.stringify(lines.map((l) => l.sku)))
-      if (pay === 'card') {
+      if (pay === 'card' || EASY[pay]) {
         // PC 는 결제창이 이 화면 위에 뜨고, 끝나면 바로 주문 완료로 (휴대폰은 페이지 이동)
-        const paid = await payWithCard(order.code)
+        const paid = await payWithCard(order.code, EASY[pay])
         if (paid?.status === 'paid') window.location.replace(`/order/complete?order=${encodeURIComponent(paid.code)}`)
         return
       } else if (pay === 'kakao') await payWithKakao(order.code)
@@ -326,17 +330,23 @@ export function CheckoutPage() {
             <div className="pay-pick">
               {[
                 ['card', '신용·체크카드'],
+                ['kcp_kakao', '카카오페이'],
+                ['kcp_naver', '네이버페이'],
+                ['kcp_toss', '토스페이'],
                 ['kakao', '카카오페이'],
                 ['naver', '네이버페이'],
               ]
-                .filter(([k]) => !cfg?.live || cfg?.[k]?.enabled) // 오픈 뒤엔 못 쓰는 결제수단은 숨김
+                .filter(([k]) => !cfg?.live || payOn(cfg, k)) // 오픈 뒤엔 못 쓰는 결제수단은 숨김
+                // 간편결제는 KCP 결제창 쪽을 쓰고, 카카오페이·네이버페이 직접 연동이 열리면 그쪽만 보인다
+                .filter(([k]) => (k === 'kcp_kakao' ? !cfg?.kakao?.enabled : k === 'kcp_naver' ? !cfg?.naver?.enabled : true))
+                .filter(([k]) => (k === 'kakao' || k === 'naver' ? !!cfg?.[k]?.enabled : true))
                 .map(([k, label]) => (
-                <button key={k} className={`${pay === k ? 'on' : ''} ${k}`} disabled={!cfg?.[k]?.enabled} onClick={() => setPay(k)}>
+                <button key={k} className={`${pay === k ? 'on' : ''} ${k.replace('kcp_', '')}`} disabled={!payOn(cfg, k)} onClick={() => setPay(k)}>
                   {label}
                 </button>
               ))}
             </div>
-            {cfg && cfg[pay]?.test && <p className="muted small">개발 중이라 실제로 결제되지 않아요.</p>}
+            {cfg && cfg[EASY[pay] ? 'card' : pay]?.test && <p className="muted small">개발 중이라 실제로 결제되지 않아요.</p>}
           </section>
         </div>
 

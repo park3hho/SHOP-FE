@@ -158,8 +158,9 @@ const loadPortone = (url) =>
   }))
 
 /** 카드 결제 → (PC) order · (휴대폰) 페이지 이동으로 돌아오지 않음. 값은 전부 서버가 정한 것 */
-export const payWithCard = async (code) => {
-  const r = await call('/payments/portone/ready', { ...ref(code), return_origin: origin() })
+/** easyPay: 'KAKAOPAY' | 'NAVERPAY' | 'TOSSPAY' 면 KCP 결제창의 간편결제로 (없으면 일반 카드) */
+export const payWithCard = async (code, easyPay) => {
+  const r = await call('/payments/portone/ready', { ...ref(code), return_origin: origin(), ...(easyPay ? { easy_pay: easyPay } : {}) })
   await loadPortone(r.sdk_url)
   const res = await window.PortOne.requestPayment(r.request)
   if (!res || res.code) {
