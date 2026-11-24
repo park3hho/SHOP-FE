@@ -164,7 +164,7 @@ export function AddressFields({ value, onChange }) {
 
 // KCP 결제창 간편결제 — 고객이 카카오페이·네이버페이·토스페이 앱에 저장해 둔 카드로 결제 (2026-11-24)
 const EASY = { kcp_kakao: 'KAKAOPAY', kcp_naver: 'NAVERPAY', kcp_toss: 'TOSSPAY' }
-const payOn = (cfg, k) => (EASY[k] ? !!cfg?.card?.enabled : !!cfg?.[k]?.enabled)
+const payOn = (cfg, k) => (EASY[k] ? !!cfg?.easy?.enabled : !!cfg?.[k]?.enabled) // 간편결제는 KCP 가맹 설정이 켜진 뒤 (SHOP_KCP_EASY=1)
 
 // 주문서 /order/checkout — 주문 상품 · 배송지 · 개인통관고유부호 · 결제수단 · 동의 → 결제
 export function CheckoutPage() {
