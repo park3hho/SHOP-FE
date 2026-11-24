@@ -23,8 +23,20 @@ import {
   withdraw,
   won,
 } from '../lib/api'
+import { deleteMyCard, getMyCard, getPayConfig, registerCard, setPayPin } from '../lib/payments'
 import { Link, navigate } from '../lib/router'
 import { AddressFields } from './OrderPages'
+
+// 등록 카드 결제 스위치 — 한 번 받아 메뉴·화면이 같이 씁다 (꺼져 있으면 '결제 카드' 메뉴 자체가 없음)
+let billingPromise = null
+const billingOn = () => (billingPromise ||= getPayConfig().then((c) => !!c.billing?.enabled).catch(() => false))
+function useBillingOn() {
+  const [on, setOn] = useState(false)
+  useEffect(() => {
+    billingOn().then(setOn)
+  }, [])
+  return on
+}
 
 const MENU = [
   { group: '나의 쇼핑', items: [{ to: '/my/orders', label: '주문 · 배송 조회' }] },
@@ -49,6 +61,12 @@ const stateLabel = (o) => (o.progress === 'cancelled' || !o.delivery ? PROGRESS[
 // 마이페이지 틀 — 왼쪽 메뉴 + 오른쪽 내용. 로그인 안 했으면 로그인으로
 function MyLayout({ path, title, children }) {
   const member = useMember()
+  const billing = useBillingOn()
+  const menu = billing
+    ? MENU.map((g) =>
+        g.group === '나의 정보' ? { ...g, items: [...g.items, { to: '/my/card', label: '결제 카드' }] } : g,
+      )
+    : MENU
   useEffect(() => {
     if (member === null) navigate(`/login?next=${encodeURIComponent(path)}`, { replace: true })
   }, [member, path])
@@ -60,7 +78,7 @@ function MyLayout({ path, title, children }) {
           <Link className="my-name" to="/my">
             <b>{member.name}</b>님
           </Link>
-          {MENU.map((g) => (
+          {menu.map((g) => (
             <div key={g.group} className="my-group">
               <div className="my-group-title">{g.group}</div>
               {g.items.map((i) => (
@@ -635,5 +653,110 @@ function DeliverySteps({ d }) {
         ))}
       </ol>
     </>
+  )
+}
+// /my/card — 결제 카드 (등록 카드 결제 · 빌링키, 2026-11-24). 서버 스위치가 꺼져 있으면 '준비 중'만.
+// 카드번호는 KCP 결제창(본인인증)에만 넣는다. 우리는 카드사와 가려진 번호만 보여 준다.
+export function MyCardPage() {
+  const on = useBillingOn()
+  const [st, setSt] = useState(null)
+  const [pin, setPin] = useState({ current: '', next: '', next2: '' })
+  const [busy, setBusy] = useState(false)
+  const [msg, setMsg] = useState('')
+  const [error, setError] = useState('')
+  const load = () =>
+    getMyCard()
+      .then(setSt)
+      .catch((e) => setError(e.message))
+  useEffect(() => {
+    if (on) load()
+  }, [on])
+  const run = async (fn, ok) => {
+    setError('')
+    setMsg('')
+    setBusy(true)
+    try {
+      await fn()
+      setMsg(ok)
+      await load()
+    } catch (e) {
+      setError(e.message)
+    } finally {
+      setBusy(false)
+    }
+  }
+  const digits = (v) => v.replace(/\D/g, '').slice(0, 6)
+  if (!on)
+    return (
+      <MyLayout path="/my/card" title="결제 카드">
+        <p className="muted">준비 중이에요.</p>
+      </MyLayout>
+    )
+  const card = st?.card
+  return (
+    <MyLayout path="/my/card" title="결제 카드">
+      <section className="fields">
+        <p className="muted small">카드를 한 번 등록해 두면 다음 주문부터 카드번호 없이 결제 비밀번호 6자리로 결제해요. 카드번호는 결제대행사(NHN KCP)에만 보관돼요.</p>
+        {card ? (
+          <div className="line compact">
+            <div className="line-body">
+              <div className="name">
+                {card.issuer || '등록 카드'} {card.last4 ? `****${card.last4}` : card.number_masked || ''}
+              </div>
+              <div className="muted small">{card.issued_at ? `${kst(card.issued_at)} 등록` : ''}</div>
+            </div>
+            <button className="text-btn" disabled={busy} onClick={() => run(registerCard, '카드를 바꿨어요.')}>
+              다른 카드로
+            </button>
+            <button
+              className="text-btn"
+              disabled={busy}
+              onClick={() => window.confirm('등록 카드를 지울까요?') && run(deleteMyCard, '카드를 지웠어요.')}
+            >
+              삭제
+            </button>
+          </div>
+        ) : (
+          <button className="btn-black" disabled={busy || !st} onClick={() => run(registerCard, '카드를 등록했어요.')}>
+            {busy ? '결제창 여는 중…' : '카드 등록'}
+          </button>
+        )}
+      </section>
+
+      <form
+        className="fields"
+        onSubmit={(e) => {
+          e.preventDefault()
+          if (pin.next !== pin.next2) return setError('새 결제 비밀번호가 서로 달라요')
+          run(async () => {
+            await setPayPin(pin.next, st?.pin_set ? pin.current : null)
+            setPin({ current: '', next: '', next2: '' })
+          }, '결제 비밀번호를 저장했어요.')
+        }}
+      >
+        <h2>결제 비밀번호 {st?.pin_set ? '변경' : '만들기'}</h2>
+        <p className="muted small">숫자 6자리 · 같은 숫자나 연속된 숫자는 안 돼요 · 5번 틀리면 30분 잠겨요</p>
+        {st?.pin_locked_until && <p className="error">잠겨 있어요 ({kst(st.pin_locked_until)}까지)</p>}
+        {st?.pin_set && (
+          <label>
+            지금 결제 비밀번호
+            <input type="password" inputMode="numeric" autoComplete="off" value={pin.current} onChange={(e) => setPin({ ...pin, current: digits(e.target.value) })} />
+          </label>
+        )}
+        <label>
+          새 결제 비밀번호
+          <input type="password" inputMode="numeric" autoComplete="off" value={pin.next} onChange={(e) => setPin({ ...pin, next: digits(e.target.value) })} />
+        </label>
+        <label>
+          한 번 더
+          <input type="password" inputMode="numeric" autoComplete="off" value={pin.next2} onChange={(e) => setPin({ ...pin, next2: digits(e.target.value) })} />
+        </label>
+        <button className="btn-black" disabled={busy || pin.next.length !== 6}>
+          저장
+        </button>
+      </form>
+      {error && <p className="error">{error}</p>}
+      {msg && <p className="hint">{msg}</p>}
+    </MyLayout>
   )
 }

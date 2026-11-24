@@ -105,3 +105,8 @@ else await reportReturn(q.get('order'), 'naver', q.get('resultCode'), q.get('res
 2. 서버 `.env`: `KAKAOPAY_CID`, `KAKAOPAY_SECRET_KEY`, `NAVERPAY_MODE=production`, `NAVERPAY_*`, `ENV=prod` (테스트 취소 막힘)
 3. 상품을 AGC 상품·가격으로 (`SHOP-BE services/catalog.py`)
 4. FE 는 바꿀 것 없음
+
+## 등록 카드 결제 (빌링키, 2026-11-24) — 서버 스위치 꺼져 있으면 안 보임
+- `getPayConfig().billing.enabled` 가 true 일 때만: 마이페이지 메뉴 '결제 카드'(/my/card — 카드 등록·다른 카드로·삭제, 결제 비밀번호 만들기·변경), 주문서 '등록 카드로 결제 (카드사 ****1234)' + 결제 비밀번호 6자리.
+- 함수(lib/payments.js): `getMyCard` · `registerCard`(POST /me/card/issue-request → `PortOne.requestIssueBillingKey` → POST /me/card) · `deleteMyCard` · `setPayPin(pin, current)` · `payWithSavedCard(code, pin)`.
+- 비밀번호를 틀리면 같은 주문으로 다시 시도(새 주문 안 만듦). 켜는 순서·서버 규칙은 SHOP BE docs/payments.md.

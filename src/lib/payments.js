@@ -39,8 +39,15 @@ export const getProducts = async () => (await call('/products')).items
 
 /** 쓸 수 있는 결제수단 → { kakao, naver, card: { enabled, test } (신용·체크카드 = 포트원 · KCP) } */
 export const getPayConfig = async () => {
-  const { kakao, naver, card, live } = await call('/payments/config')
-  return { live: !!live, kakao, naver, card: card || { enabled: false, test: true } }
+  const { kakao, naver, card, live, easy, billing } = await call('/payments/config')
+  return {
+    live: !!live,
+    kakao,
+    naver,
+    card: card || { enabled: false, test: true },
+    easy: easy || { enabled: false },
+    billing: billing || { enabled: false, test: true }, // 등록 카드 결제 (SHOP_BILLING, KCP 자동결제 계약 전엔 false)
+  }
 }
 
 /** 주문 만들기 — items: [{ sku, qty }] → order { code, total_amount, status, … }
@@ -191,3 +198,46 @@ export const forgetOrder = (code) => localStorage.removeItem(KEY(code))
 // 오픈 여부 — 한 번 받아 모든 화면이 같이 쓴다 (위쪽 '개발 중' 안내)
 let livePromise = null
 export const getLive = () => (livePromise ||= getPayConfig().then((c) => c.live).catch(() => false))
+
+// ── 등록 카드 결제 (빌링키 · 포트원 V2 · KCP 정기결제 채널, 2026-11-24) ─────────────────────────
+// 서버 스위치(config.billing.enabled)가 꺼져 있으면 화면 어디에도 안 보인다. 카드번호는 KCP 결제창에만 넣는다(우리 서버는 안 받음).
+// 회원 로그인 쿠키가 필요해서 credentials 를 붙인다
+async function callMe(path, { method, body } = {}) {
+  const res = await fetch(`${API}${path}`, {
+    method: method || (body ? 'POST' : 'GET'),
+    credentials: 'same-origin',
+    headers: body ? { 'Content-Type': 'application/json' } : undefined,
+    body: body ? JSON.stringify(body) : undefined,
+  })
+  const data = await res.json().catch(() => ({}))
+  if (!res.ok) {
+    const err = new Error(typeof data.detail === 'string' ? data.detail : '서버 요청에 실패했어요')
+    err.status = res.status
+    throw err
+  }
+  return data
+}
+
+/** 내 결제 카드 → { card: {issuer, number_masked, last4, …} | null, pin_set, pin_locked_until } */
+export const getMyCard = () => callMe('/me/card')
+
+/** 카드 등록 — KCP 결제창(본인인증)에서 카드 입력 → 서버가 포트원에서 확인 후 저장 → card */
+export const registerCard = async () => {
+  const r = await callMe('/me/card/issue-request', { method: 'POST' })
+  await loadPortone(r.sdk_url)
+  const res = await window.PortOne.requestIssueBillingKey(r.request)
+  if (!res || res.code || !res.billingKey) {
+    const cancel = /CANCEL/i.test(res?.code || '') || /취소/.test(res?.message || '')
+    throw new Error(cancel ? '카드 등록을 취소했어요' : res?.message || '카드를 등록하지 못했어요')
+  }
+  return (await callMe('/me/card', { body: { billing_key: res.billingKey } })).card
+}
+
+export const deleteMyCard = () => callMe('/me/card', { method: 'DELETE' })
+
+/** 결제 비밀번호 6자리 정하기 · 바꾸기 (바꿀 때는 current 필요) */
+export const setPayPin = (pin, current) => callMe('/me/card/pin', { body: { pin, current_pin: current || null } })
+
+/** 등록 카드로 결제 → order (status 'paid') — 금액은 서버가 주문으로 정한다 */
+export const payWithSavedCard = async (code, pin) =>
+  (await callMe('/payments/billing/pay', { body: { ...ref(code), pin } })).order

@@ -4,7 +4,7 @@ import { Agreements, emptyAgree, requiredOk } from '../components/Agreements'
 import { Page } from '../components/Layout'
 import { getProfile, kst, listAddresses, myOrder, PAY_METHOD, PROGRESS, useMember, won } from '../lib/api'
 import { clearCart, getBuyNow, removeFromCart, setBuyNow, setQty, useCart } from '../lib/cart'
-import { createOrder, getOrder, getPayConfig, payWithCard, payWithKakao, payWithNaver } from '../lib/payments'
+import { createOrder, getMyCard, getOrder, getPayConfig, payWithCard, payWithKakao, payWithNaver, payWithSavedCard } from '../lib/payments'
 import { track } from '../lib/track'
 import { Link, navigate } from '../lib/router'
 import { ORDER_ITEMS } from './agreeTexts'
@@ -182,6 +182,10 @@ export function CheckoutPage() {
   const [agree, setAgree] = useState(emptyAgree(ORDER_ITEMS)) // 구매 진행 · 제3자 제공 · 국외 이전 (모두 필수)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
+  // 등록 카드 결제 (빌링키, 2026-11-24) — 서버 스위치가 켜져 있고 카드를 등록한 회원만
+  const [saved, setSaved] = useState(null) // { card, pin_set }
+  const [pin, setPin] = useState('')
+  const [billOrder, setBillOrder] = useState(null) // 비밀번호를 틀려 다시 누를 때 같은 주문을 쓴다
 
   useEffect(() => {
     if (member === null) navigate(`/login?next=${encodeURIComponent('/order/checkout')}`, { replace: true })
@@ -201,6 +205,15 @@ export function CheckoutPage() {
     getPayConfig().then((c) => {
       setCfg(c)
       setPay(c.card.enabled ? 'card' : c.kakao.enabled ? 'kakao' : c.naver.enabled ? 'naver' : '')
+      if (c.billing?.enabled)
+        getMyCard()
+          .then((s) => {
+            if (s.card) {
+              setSaved(s)
+              setPay('saved')
+            }
+          })
+          .catch(() => {})
     })
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [member])
@@ -219,7 +232,20 @@ export function CheckoutPage() {
     setError('')
     if (!pay) return setError('결제 수단을 골라 주세요')
     if (!requiredOk(ORDER_ITEMS, agree)) return setError('주문 동의 항목에 모두 동의해 주세요')
+    if (pay === 'saved' && !saved?.pin_set) return setError('마이페이지 › 결제 카드에서 결제 비밀번호를 먼저 정해 주세요')
+    if (pay === 'saved' && !/^\d{6}$/.test(pin)) return setError('결제 비밀번호 6자리를 넣어 주세요')
     setBusy(true)
+    if (pay === 'saved' && billOrder) {
+      try {
+        const paid = await payWithSavedCard(billOrder, pin)
+        if (paid?.status === 'paid') window.location.replace(`/order/complete?order=${encodeURIComponent(paid.code)}`)
+      } catch (e) {
+        setError(e.message)
+        setPin('')
+        setBusy(false)
+      }
+      return
+    }
     track('begin_checkout', { value: total })
     try {
       const order = await createOrder(
@@ -235,6 +261,12 @@ export function CheckoutPage() {
       )
       sessionStorage.setItem('shop.checkoutFrom', new URLSearchParams(window.location.search).get('buy') || '')
       sessionStorage.setItem('shop.checkoutSkus', JSON.stringify(lines.map((l) => l.sku)))
+      if (pay === 'saved') {
+        setBillOrder(order.code)
+        const paid = await payWithSavedCard(order.code, pin)
+        if (paid?.status === 'paid') window.location.replace(`/order/complete?order=${encodeURIComponent(paid.code)}`)
+        return
+      }
       if (pay === 'card' || EASY[pay]) {
         // PC 는 결제창이 이 화면 위에 뜨고, 끝나면 바로 주문 완료로 (휴대폰은 페이지 이동)
         const paid = await payWithCard(order.code, EASY[pay])
@@ -246,6 +278,7 @@ export function CheckoutPage() {
       setTimeout(() => setBusy(false), 6000)
     } catch (e) {
       setError(e.message)
+      if (pay === 'saved') setPin('')
       setBusy(false)
     }
   }
@@ -328,6 +361,11 @@ export function CheckoutPage() {
           <section>
             <h2>결제 수단</h2>
             <div className="pay-pick">
+              {saved?.card && (
+                <button className={pay === 'saved' ? 'on' : ''} onClick={() => setPay('saved')}>
+                  등록 카드로 결제 ({saved.card.issuer || '카드'} {saved.card.last4 ? `****${saved.card.last4}` : ''})
+                </button>
+              )}
               {[
                 ['card', '신용·체크카드'],
                 ['kcp_kakao', '카카오페이'],
@@ -346,7 +384,21 @@ export function CheckoutPage() {
                 </button>
               ))}
             </div>
-            {cfg && cfg[EASY[pay] ? 'card' : pay]?.test && <p className="muted small">개발 중이라 실제로 결제되지 않아요.</p>}
+            {pay === 'saved' && (
+              <label className="field">
+                결제 비밀번호 6자리
+                <input
+                  type="password"
+                  inputMode="numeric"
+                  autoComplete="off"
+                  value={pin}
+                  onChange={(e) => setPin(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                  placeholder={saved?.pin_set ? '●●●●●●' : '마이페이지에서 먼저 정해 주세요'}
+                  disabled={!saved?.pin_set}
+                />
+              </label>
+            )}
+            {cfg && cfg[pay === 'saved' ? 'billing' : EASY[pay] ? 'card' : pay]?.test && <p className="muted small">개발 중이라 실제로 결제되지 않아요.</p>}
           </section>
         </div>
 

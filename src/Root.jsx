@@ -9,6 +9,7 @@ import { LoginPage, SignupPage, SocialSignupPage } from './pages/AuthPages'
 import { GuidePage, PolicyPage, PrivacyPage, StoryPage, TermsPage } from './pages/InfoPages'
 import {
   MyAddressesPage,
+  MyCardPage,
   MyHomePage,
   MyOrderPage,
   MyOrdersPage,
@@ -47,6 +48,7 @@ export default function Root() {
   if (path === '/my/addresses') return <MyAddressesPage />
   if (path === '/my/profile') return <MyProfilePage />
   if (path === '/my/password') return <MyPasswordPage />
+  if (path === '/my/card') return <MyCardPage />
   if (path === '/terms') return <TermsPage />
   if (path === '/privacy') return <PrivacyPage />
   if (path === '/guide') return <GuidePage />
