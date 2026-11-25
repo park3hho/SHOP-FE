@@ -25,9 +25,11 @@ import './shop.css'
 export default function Root() {
   const { path, query } = useLocation()
   // 방문 기록 — 화면이 바뀔 때마다 한 번 (자사 분석도구). 결제 돌아오는 주소(/pay/…)는 세지 않는다
+  // 상품 목록은 분류(?cat=…)만 바꿔도 화면이 바뀌므로 한 번 더 센다 (2026-11-25 — 분류만 누르면 방문 기록이 안 남던 것)
+  const listQs = path === '/products' ? query.toString() : ''
   useEffect(() => {
-    if (!path.startsWith('/pay')) trackPage(path)
-  }, [path])
+    if (!path.startsWith('/pay')) trackPage(listQs ? `${path}?${listQs}` : path)
+  }, [path, listQs])
   useEffect(() => setCanonical(path, query), [path, query])
   let m
   // 메인 = Today (기획 큐레이션). Story 는 MKT 팀 글이 올라갈 자리 (지금은 준비 중 화면)
