@@ -22,7 +22,7 @@ function Row({ p }) {
       <div className="row-body">
         <div className="brand">{p.brand}</div>
         <div className="name">{p.name}</div>
-        <div className="price"><em>{p.off}%</em>{won(p.price)}</div>
+        <div className="price">{won(p.price)}</div>
         <div className="tags"><span>무료배송</span><span>해외직배송</span></div>
       </div>
       <button className="like" aria-label="찜" onClick={(e) => e.preventDefault()}><Heart /></button>
@@ -80,9 +80,11 @@ function useLiveData() {
           out[k] = data[k]
             .filter((p) => sale.has(p.code))
             .map((p) => {
+              // 이름 · 가격 · 사진은 서버 값(지금 파는 값 · 대표사진)으로 — 시안(mock)의 옛 사진 · 가짜 할인율을 쓰지 않는다 (2026-11-25)
               const l = sale.get(p.code)
-              if (k !== 'best' || !l.img) return p
-              return { ...p, stage: l.img, hover: l.img_hover || p.img, img: l.img_hover || l.img }
+              const base = { ...p, name: l.name || p.name, brand: l.brand || p.brand, price: l.price ?? p.price, img: l.img || p.img }
+              if (k !== 'best' || !l.img) return base
+              return { ...base, stage: l.img, hover: l.img_hover || p.img, img: l.img_hover || l.img }
             })
         }
         setLists(out)
@@ -201,7 +203,7 @@ export default function App({ Header, Footer }) {
               <div className="brand">{p.brand}</div>
               <div className="name">{p.name}</div>
               <div className="cn">{p.cn}</div>
-              <div className="price"><em>{p.off}%</em>{won(p.price)}</div>
+              <div className="price">{won(p.price)}</div>
             </Link>
             )
           })}
