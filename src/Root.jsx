@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
 
 import App from './App.jsx'
+import FloatingCart from './components/FloatingCart'
 import { Footer, Header } from './components/Layout'
 import { match, useLocation } from './lib/router'
 import { setCanonical } from './lib/meta'
@@ -23,6 +24,16 @@ import './shop.css'
 
 // 경로 → 화면. 목록은 docs/shop-pages.md
 export default function Root() {
+  const { path } = useLocation()
+  return (
+    <>
+      <Routes />
+      <FloatingCart path={path} />
+    </>
+  )
+}
+
+function Routes() {
   const { path, query } = useLocation()
   // 방문 기록 — 화면이 바뀔 때마다 한 번 (자사 분석도구). 결제 돌아오는 주소(/pay/…)는 세지 않는다
   // 상품 목록은 분류(?cat=…)만 바꿔도 화면이 바뀌므로 한 번 더 센다 (2026-11-25 — 분류만 누르면 방문 기록이 안 남던 것)
