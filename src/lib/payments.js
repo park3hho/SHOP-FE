@@ -39,7 +39,7 @@ export const getProducts = async () => (await call('/products')).items
 
 /** 쓸 수 있는 결제수단 → { kakao, naver, card: { enabled, test } (신용·체크카드 = 포트원 · KCP) } */
 export const getPayConfig = async () => {
-  const { kakao, naver, card, live, easy, billing } = await call('/payments/config')
+  const { kakao, naver, card, live, easy, billing, freight } = await call('/payments/config')
   return {
     live: !!live,
     kakao,
@@ -47,6 +47,7 @@ export const getPayConfig = async () => {
     card: card || { enabled: false, test: true },
     easy: easy || { enabled: false },
     billing: billing || { enabled: false, test: true }, // 등록 카드 결제 (SHOP_BILLING, KCP 자동결제 계약 전엔 false)
+    freight: freight || { enabled: false }, // 배송비 별도 (SHOP_FREIGHT, 2026-11-27)
   }
 }
 
