@@ -32,9 +32,8 @@ export function FreightRow({ f }) {
 export function FreightBar({ data }) {
   if (!data) return null
   return (
+    // 운임부담점수 · 안내 문구는 '해외 배송비 (예상)' 오버레이에만 (2026-11-28 사용자: 아래에 띄울 필요 없음)
     <div className="fr-ship">
-      운임부담점수 <b>{data.score.toLocaleString(undefined, { maximumFractionDigits: 1 })}점</b>
-      <div className="fr-note">{SCORE_NOTE}</div>
       <div className="fr-avg">
         평균 배송비 <b>{won(data.avg)}</b> <span>(상품 1개당)</span>
       </div>
