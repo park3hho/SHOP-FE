@@ -6,7 +6,7 @@ export function FreightLabel({ f }) {
   return (
     <span className="fr-q" tabIndex={0}>
       해외 배송비 (예상)
-      {f.data && <span className="fr-tip">운임부담점수 {f.data.score.toLocaleString()}점 기준</span>}
+      {f.data && <span className="fr-tip">운임부담점수 {f.data.score.toLocaleString(undefined, { maximumFractionDigits: 1 })}점 기준</span>}
     </span>
   )
 }
@@ -24,7 +24,7 @@ export function FreightBar({ data }) {
   if (!data) return null
   return (
     <div className="fr-ship">
-      운임부담점수 <b>{data.score.toLocaleString()}점</b>
+      운임부담점수 <b>{data.score.toLocaleString(undefined, { maximumFractionDigits: 1 })}점</b>
       <div className="fr-avg">
         평균 배송비 <b>{won(data.avg)}</b> <span>(상품 1개당)</span>
       </div>
