@@ -180,14 +180,8 @@ export default function App({ Header, Footer }) {
 
       <main className="board">
         <div className="col col-hero">
-          <Hero
-            img={(chagee.find((p) => p.code === TEA_HERO) || chagee[0])?.img || CHAGEE_HERO_IMG}
-            en="CHAGEE"
-            ko="차지 · 매장 원엽차를 집에서 티백으로"
-            to={`/products?q=${encodeURIComponent('차지')}&cat=tea`}
-            burned
-          />
-          <Hero img="/img/soda.jpg" en="ARCTIC OCEAN" ko="북빙양 · 1936년부터 베이징의 귤맛 사이다" to="/products/PR-261020-0007" />
+          <Hero img="/img/soda.jpg" en="ARCTIC OCEAN" ko="북빙양 · 1936년부터 베이징의 귤맛 사이다" />
+          <Hero img="/img/lychee.jpg" en="LYCHEE SEASON" ko="리치 · 광둥에서 온 여름의 맛" />
         </div>
         <div className="col">
           <Story img="/img/tea.jpg" title="무가당 차, 처음이라면" sub="단맛 없이 향만 남긴 중국 편의점 차예요." items={live.tea} />
