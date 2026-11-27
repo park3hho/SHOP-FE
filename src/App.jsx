@@ -171,7 +171,9 @@ function TeaBand({ items }) {
 export default function App({ Header, Footer }) {
   const live = useLiveData()
   const chagee = useChagee()
-  const best = live.best
+  // 많이 담는 음료 8칸 — 차파이는 8위 고정, 앞 7칸은 지금 파는 것 순서대로 (안 파는 게 빠지면 뒤 후보가 채움) (2026-11-25 사용자)
+  const BEST_8 = 'PR-261019-0004'
+  const best = [...live.best.filter((p) => p.code !== BEST_8).slice(0, 7), ...live.best.filter((p) => p.code === BEST_8)]
   return (
     <>
       <Header />

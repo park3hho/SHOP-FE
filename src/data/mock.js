@@ -168,6 +168,16 @@ export default {
    "off": 0,
    "brand": "농부산천",
    "stage": "https://api.eidofood.com/files/photos/2026/10/7e6b6ef0a6804338a509e90d258f3e23.jpg"
+  },
+  {
+   "code": "PR-261025-0029",
+   "name": "싼치 통레몬 레몬 탄산음료 (캔)",
+   "cn": "三麒 一片真柠檬 柠檬汁气泡水",
+   "img": "https://api.eidofood.com/files/photos/2026/10/1973ee644c4a4182aa665f7032a698f0.jpg",
+   "price": 16300,
+   "off": 10,
+   "brand": "싼치",
+   "stage": "/img/stage/PR-261025-0029.jpg"
   }
  ],
  "milktea": [
