@@ -418,3 +418,10 @@ input[type='checkbox'] { accent-color: #000; }
 .qa-pop-head { padding: 12px; font-size: 13px; font-weight: 700; border-bottom: 1px solid var(--line); }
 .qa-toast { position: fixed; left: 50%; bottom: 28px; transform: translateX(-50%); z-index: 70; background: var(--ink); color: #fff; font-size: 13px; padding: 8px 16px; opacity: 0; pointer-events: none; transition: opacity .2s; }
 .qa-toast.on { opacity: 1; }
+
+/* 미리보기 수량 −/+ (2026-11-27) */
+.fcart-nm span.fcart-qty { display: inline-flex; align-items: center; margin-top: 4px; border: 1px solid var(--line); color: var(--ink); overflow: visible; }
+.fcart-qty button { width: 22px; height: 20px; border: 0; background: none; font-size: 13px; line-height: 1; cursor: pointer; color: var(--ink); }
+.fcart-qty button:disabled { color: var(--mute); cursor: default; }
+.fcart-qty em { font-style: normal; min-width: 20px; text-align: center; font-size: 12px; font-variant-numeric: tabular-nums; }
+.fcart-item a { color: inherit; }

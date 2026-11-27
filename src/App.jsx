@@ -144,7 +144,7 @@ function TeaBand({ items }) {
       <div className="tea-band-body">
         <p className="tea-eyebrow">NEW · TEA</p>
         <h2>
-          CHAGEE <span className="cn">霸王茶姬</span>
+          CHAGEE 차지
           <br />
           이제 집에서 우려 마셔요
         </h2>
@@ -222,7 +222,6 @@ export default function App({ Header, Footer }) {
               </div>
               <div className="brand">{p.brand}</div>
               <div className="name">{p.name}</div>
-              <div className="cn">{p.cn}</div>
               <div className="pr">
                 <div className="price">{won(p.price)}</div>
                 <QuickAdd code={p.code} />

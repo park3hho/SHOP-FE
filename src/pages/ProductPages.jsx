@@ -92,7 +92,6 @@ export function ProductListPage({ query }) {
             </div>
             <div className="brand">{p.brand}</div>
             <div className="name">{p.name}</div>
-            <div className="cn">{p.name_cn}</div>
             <div className="pr">
               <div className="price">{p.price ? `${won(p.price)}~` : '-'}</div>
               {p.price ? <QuickAdd code={p.code} /> : null}
@@ -240,7 +239,6 @@ export function ProductDetailPage({ code }) {
         <div className="pd-info">
           <div className="brand">{p.brand}</div>
           <h1>{p.name}</h1>
-          <div className="cn">{p.name_cn}</div>
           <div className="pd-price">{won(opt ? opt.price : Math.min(...p.options.map((o) => o.price)))}</div>
           <dl className="pd-meta">
             <dt>배송</dt>
@@ -349,7 +347,7 @@ export function ProductDetailPage({ code }) {
                 {p.intro.flavors.map((x) => (
                   <li key={x.name}>
                     <b>{x.name}</b>
-                    {x.name_cn && <span className="cn"> {x.name_cn}</span>} — {x.desc}
+                    {' — '}{x.desc}
                   </li>
                 ))}
               </ul>
@@ -373,7 +371,7 @@ export function ProductDetailPage({ code }) {
         <dl className="kv">
           <dt>상품명</dt>
           <dd>
-            {p.name} ({p.name_cn})
+            {p.name}
           </dd>
           {p.info.map((r) => (
             <span key={r.label} style={{ display: 'contents' }}>

@@ -5,7 +5,7 @@
 import { useEffect, useRef, useState } from 'react'
 
 import { useMember, won } from '../lib/api'
-import { setBuyNow, useCart } from '../lib/cart'
+import { removeFromCart, setQty, setBuyNow, useCart } from '../lib/cart'
 import { useFreight } from '../lib/freight'
 import { Link, navigate } from '../lib/router'
 import { FreightRow } from './Freight'
@@ -84,16 +84,32 @@ export default function FloatingCart({ path }) {
           </div>
           <div className="fcart-list">
             {items.map((i) => (
-              <Link key={i.sku} className="fcart-item" to={`/products/${i.code}`}>
-                <img src={i.img} alt="" />
+              <div key={i.sku} className="fcart-item">
+                <Link to={`/products/${i.code}`}>
+                  <img src={i.img} alt="" />
+                </Link>
                 <span className="fcart-nm">
-                  <b>{i.name}</b>
-                  <span>
-                    {i.option} · {i.qty}개
+                  <Link to={`/products/${i.code}`}>
+                    <b>{i.name}</b>
+                  </Link>
+                  <span>{i.option}</span>
+                  {/* 미리보기에서 바로 수량 (2026-11-27) — 1개에서 − 누르면 뺀다 */}
+                  <span className="fcart-qty">
+                    <button
+                      type="button"
+                      aria-label={i.qty > 1 ? "하나 빼기" : "삭제"}
+                      onClick={() => (i.qty > 1 ? setQty(i.sku, i.qty - 1) : removeFromCart([i.sku]))}
+                    >
+                      −
+                    </button>
+                    <em>{i.qty}</em>
+                    <button type="button" aria-label="하나 더" onClick={() => setQty(i.sku, i.qty + 1)} disabled={i.qty >= 10}>
+                      +
+                    </button>
                   </span>
                 </span>
                 <span className="fcart-pr">{won((i.price || 0) * i.qty)}</span>
-              </Link>
+              </div>
             ))}
           </div>
           <div className="fcart-foot">
