@@ -261,7 +261,8 @@ export function MyOrderPage({ code }) {
             <dd>{PAY_METHOD[o.provider] || '-'}</dd>
             <dt>결제 금액</dt>
             <dd>
-              <b>{won(o.total_amount)}</b> (배송비 무료)
+              <b>{won(o.total_amount)}</b> ({o.shipping_fee ? `배송비 ${won(o.shipping_fee)} 포함` : '배송비 무료'})
+              {o.refunded_amount > 0 && <span className="muted"> · 부분 환불 {won(o.refunded_amount)}</span>}
             </dd>
             <dt>결제 시각</dt>
             <dd>{kst(o.paid_at) || '-'}</dd>

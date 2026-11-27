@@ -55,3 +55,23 @@ export function useCart() {
   }, [])
   return items
 }
+
+// 가격 새로고침 (2026-11-27 배송비 별도 전환) — 담을 때 가격이라 체계가 바뀌면 예전 값이 남는다.
+// 앱 켤 때 한 번: 서버 가격으로 바꾸고, 지금 안 파는 줄(예전 묶음 등)은 뺀다.
+export async function refreshCart() {
+  const items = read()
+  if (!items.length) return
+  try {
+    const res = await fetch('/api/shop/cart/check', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ skus: items.map((i) => i.sku) }),
+    })
+    if (!res.ok) return
+    const { prices } = await res.json()
+    const next = items.filter((i) => prices[i.sku] != null).map((i) => ({ ...i, price: prices[i.sku] }))
+    if (next.length !== items.length || next.some((i, k) => i.price !== items[k].price)) write(next)
+  } catch {
+    /* 오프라인이면 그대로 */
+  }
+}

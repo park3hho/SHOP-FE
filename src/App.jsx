@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react'
 
 import data from './data/mock.js'
 import { listProducts } from './lib/api'
+import { useFreightOn } from './lib/freight'
 import { Link } from './lib/router'
 
 const won = (n) => n.toLocaleString('ko-KR')
@@ -16,6 +17,7 @@ function Heart() {
 }
 
 function Row({ p }) {
+  const sep = useFreightOn() // 배송비 별도면 무료배송 표시 뺌 (2026-11-27)
   return (
     <Link className="row" to={`/products/${p.code}`}>
       <img className="row-img" src={p.img} alt="" loading="lazy" />
@@ -23,7 +25,7 @@ function Row({ p }) {
         <div className="brand">{p.brand}</div>
         <div className="name">{p.name}</div>
         <div className="price">{won(p.price)}</div>
-        <div className="tags"><span>무료배송</span><span>해외직배송</span></div>
+        <div className="tags">{!sep && <span>무료배송</span>}<span>해외직배송</span></div>
       </div>
       <button className="like" aria-label="찜" onClick={(e) => e.preventDefault()}><Heart /></button>
     </Link>

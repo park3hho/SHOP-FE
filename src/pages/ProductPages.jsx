@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from 'react'
 import { Page } from '../components/Layout'
 import { getProduct, listProducts, useCategories, useMember, won } from '../lib/api'
 import { addToCart, setBuyNow } from '../lib/cart'
+import { useFreightOn } from '../lib/freight'
 import { track } from '../lib/track'
 import { setMeta } from '../lib/meta'
 import { Link, navigate } from '../lib/router'
@@ -180,7 +181,7 @@ export function ProductDetailPage({ code }) {
         const low = prices.length ? Math.min(...prices) : null
         setMeta(
           d.name,
-          `${d.name} (${d.name_cn})${low ? ` · ${low.toLocaleString('ko-KR')}원부터` : ''} · 무료배송 해외구매대행. 현지 그 맛 그대로, EIDOFOOD 이도식품.`,
+          `${d.name} (${d.name_cn})${low ? ` · ${low.toLocaleString('ko-KR')}원부터` : ''} · ${d.shipping?.separate ? '해외구매대행' : '무료배송 해외구매대행'}. 현지 그 맛 그대로, EIDOFOOD 이도식품.`,
         )
       })
       .catch((e) => setError(e.message))
@@ -387,12 +388,17 @@ export function ProductDetailPage({ code }) {
 
 // 상품 상세 '배송 · 교환 · 환불' 탭 · 해외구매대행 안내 — 정책(/policy, InfoPages.PolicyPage) 요약. 기준이 바뀌면 둘 다 고친다
 export function ShippingGuide() {
+  const sep = useFreightOn() // 배송비 별도 (2026-11-27)
   return (
     <div className="guide">
       <h3>해외구매대행 상품이에요</h3>
       <p>중국 판매처에서 구매해 받는 분 이름으로 통관한 뒤 보내 드려요. 그래서 받는 분 본인의 개인통관고유부호가 꼭 필요해요.</p>
       <h3>배송</h3>
-      <p>무료배송(제주 · 도서산간 포함) · 결제 후 약 7~14일. 현지 발송 · 통관 상황에 따라 늦어질 수 있어요. 현지 품절이면 3영업일 안에 알리고 전액 환불해 드려요.</p>
+      {sep ? (
+        <p>해외 배송비는 장바구니에 담은 상품 무게로 계산해 주문할 때 함께 받아요(제주 · 도서산간 추가 없음). 결제 후 약 7~14일. 현지 발송 · 통관 상황에 따라 늦어질 수 있어요. 현지 품절이면 3영업일 안에 알리고 그 상품 금액과 줄어든 배송비를 돌려드려요.</p>
+      ) : (
+        <p>무료배송(제주 · 도서산간 포함) · 결제 후 약 7~14일. 현지 발송 · 통관 상황에 따라 늦어질 수 있어요. 현지 품절이면 3영업일 안에 알리고 전액 환불해 드려요.</p>
+      )}
       <h3>취소</h3>
       <p>한국으로 출고되기 전에는 무료로 전액 취소돼요. 주문 접수 상태면 마이페이지에서 바로, 그 뒤에는 고객센터로 알려 주세요.</p>
       <h3>반품 · 환불</h3>

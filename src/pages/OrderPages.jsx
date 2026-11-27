@@ -201,6 +201,7 @@ export function CheckoutPage() {
   const [saved, setSaved] = useState(null) // { card, pin_set }
   const [pin, setPin] = useState('')
   const [billOrder, setBillOrder] = useState(null) // 비밀번호를 틀려 다시 누를 때 같은 주문을 쓴다
+  const f = useFreight(lines) // 해외 배송비 (예상) — 주문 만들 때 서버가 다시 계산해 합계에 넣는다
 
   useEffect(() => {
     if (member === null) navigate(`/login?next=${encodeURIComponent('/order/checkout')}`, { replace: true })
@@ -243,8 +244,12 @@ export function CheckoutPage() {
     )
 
   const total = sum(lines)
+  const fee = f.on && f.data ? f.data.fee : 0
+  const grand = total + fee
+  const feeWait = f.on && !f.data // 배송비 계산 전에는 결제 못 함
   const submit = async () => {
     setError('')
+    if (feeWait) return setError('배송비를 계산하고 있어요. 잠시 뒤 다시 눌러 주세요')
     if (!pay) return setError('결제 수단을 골라 주세요')
     if (!requiredOk(ORDER_ITEMS, agree)) return setError('주문 동의 항목에 모두 동의해 주세요')
     if (pay === 'saved' && !saved?.pin_set) return setError('마이페이지 › 결제 카드에서 결제 비밀번호를 먼저 정해 주세요')
@@ -261,7 +266,7 @@ export function CheckoutPage() {
       }
       return
     }
-    track('begin_checkout', { value: total })
+    track('begin_checkout', { value: grand })
     try {
       const order = await createOrder(
         lines.map((l) => ({ sku: l.sku, qty: l.qty })),
@@ -422,19 +427,31 @@ export function CheckoutPage() {
           <dl>
             <dt>상품 금액</dt>
             <dd>{won(total)}</dd>
-            <dt>배송비</dt>
-            <dd>무료</dd>
+            {f.on ? (
+              <>
+                <dt>
+                  <FreightLabel f={f} />
+                </dt>
+                <dd>{f.data ? won(f.data.fee) : f.loading ? '계산 중' : '-'}</dd>
+              </>
+            ) : (
+              <>
+                <dt>배송비</dt>
+                <dd>무료</dd>
+              </>
+            )}
           </dl>
+          {f.on && <FreightBar data={f.data} />}
           <div className="summary-total">
             <span>최종 결제 금액</span>
-            <b>{won(total)}</b>
+            <b>{won(grand)}</b>
           </div>
           <div className="agree">
             <Agreements items={ORDER_ITEMS} value={agree} onChange={(v) => (setAgree(v), setError(''))} allLabel="주문 내용 확인 · 전체 동의" />
           </div>
           {error && <p className="error">{error}</p>}
           <button className="btn-black" disabled={busy} onClick={submit}>
-            {busy ? '결제창 여는 중…' : `${won(total)} 결제하기`}
+            {busy ? '결제창 여는 중…' : feeWait ? '배송비 계산 중…' : `${won(grand)} 결제하기`}
           </button>
         </aside>
       </div>
@@ -585,7 +602,7 @@ function OrderDone({ o }) {
               <dt>결제 일시</dt>
               <dd>{o.paid_at ? kst(o.paid_at) : '-'}</dd>
               <dt>배송비</dt>
-              <dd>무료</dd>
+              <dd>{o.shipping_fee ? won(o.shipping_fee) : '무료'}</dd>
               <dt className="od-total">결제 금액</dt>
               <dd className="od-total">{won(o.total_amount)}</dd>
             </dl>

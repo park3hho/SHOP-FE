@@ -58,3 +58,12 @@ export function useFreight(items) {
 }
 
 export const kgText = (g) => `${(g / 1000).toFixed(1)}kg`
+
+/** 배송비 별도 모드인지 (서버 스위치 또는 직원 미리보기) — 문구 바꾸기용 */
+export function useFreightOn() {
+  const [on, setOn] = useState(false)
+  useEffect(() => {
+    freightOn().then(setOn)
+  }, [])
+  return on
+}

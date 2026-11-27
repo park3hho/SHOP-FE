@@ -2,6 +2,7 @@ import { useEffect } from 'react'
 
 import App from './App.jsx'
 import FloatingCart from './components/FloatingCart'
+import { refreshCart } from './lib/cart'
 import { Footer, Header } from './components/Layout'
 import { match, useLocation } from './lib/router'
 import { setCanonical } from './lib/meta'
@@ -41,6 +42,9 @@ function Routes() {
   useEffect(() => {
     if (!path.startsWith('/pay')) trackPage(listQs ? `${path}?${listQs}` : path)
   }, [path, listQs])
+  useEffect(() => {
+    refreshCart() // 장바구니 가격 새로고침 (2026-11-27)
+  }, [])
   useEffect(() => setCanonical(path, query), [path, query])
   let m
   // 메인 = Today (기획 큐레이션). Story 는 MKT 팀 글이 올라갈 자리 (지금은 준비 중 화면)
