@@ -425,3 +425,6 @@ input[type='checkbox'] { accent-color: #000; }
 .fcart-qty button:disabled { color: var(--mute); cursor: default; }
 .fcart-qty em { font-style: normal; min-width: 20px; text-align: center; font-size: 12px; font-variant-numeric: tabular-nums; }
 .fcart-item a { color: inherit; }
+
+/* 메인 상품 구성 (2026-11-27) */
+.pack { font-size: 12px; color: var(--sub); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }

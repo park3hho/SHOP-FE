@@ -7,7 +7,7 @@ import { useFreightOn } from './lib/freight'
 import QuickAdd from './components/QuickAdd'
 import { Link } from './lib/router'
 
-const won = (n) => n.toLocaleString('ko-KR')
+const won = (n) => `원` // 메인도 '원' 붙임 (2026-11-27)
 
 function Heart() {
   return (
@@ -25,7 +25,11 @@ function Row({ p }) {
       <div className="row-body">
         <div className="brand">{p.brand}</div>
         <div className="name">{p.name}</div>
-        <div className="price">{won(p.price)}</div>
+        {p.pack && <div className="pack">{p.pack}</div>}
+        <div className="price">
+          {won(p.price)}
+          {p.vary ? '~' : ''}
+        </div>
         <div className="tags">{!sep && <span>무료배송</span>}<span>해외직배송</span></div>
       </div>
       <div className="row-side">
@@ -100,7 +104,7 @@ function useLiveData() {
             .map((p) => {
               // 이름 · 가격 · 사진은 서버 값(지금 파는 값 · 대표사진)으로 — 시안(mock)의 옛 사진 · 가짜 할인율을 쓰지 않는다 (2026-11-25)
               const l = sale.get(p.code)
-              const base = { ...p, name: l.name || p.name, brand: l.brand || p.brand, price: l.price ?? p.price, img: l.img || p.img }
+              const base = { ...p, name: l.name || p.name, brand: l.brand || p.brand, price: l.price ?? p.price, img: l.img || p.img, pack: l.pack, vary: l.vary }
               if (k !== 'best' || !l.img) return base
               return { ...base, stage: l.img, hover: l.img_hover || p.img, img: l.img_hover || l.img }
             })
@@ -162,7 +166,7 @@ function TeaBand({ items }) {
                 </div>
                 {n.form && <div className="tea-form">{n.form}</div>}
                 <div className="name">{n.name}</div>
-                <div className="price">{p.price ? `${won(p.price)}원~` : ''}</div>
+                <div className="price">{p.price ? `${won(p.price)}~` : ''}</div>
               </Link>
             )
           })}
@@ -222,8 +226,12 @@ export default function App({ Header, Footer }) {
               </div>
               <div className="brand">{p.brand}</div>
               <div className="name">{p.name}</div>
+              {p.pack && <div className="pack">{p.pack}</div>}
               <div className="pr">
-                <div className="price">{won(p.price)}</div>
+                <div className="price">
+                  {won(p.price)}
+                  {p.vary ? '~' : ''}
+                </div>
                 <QuickAdd code={p.code} />
               </div>
             </Link>
