@@ -41,17 +41,29 @@ function Story({ img, title, sub, items }) {
   )
 }
 
-function Hero({ img, en, ko }) {
-  return (
-    <a className="hero" href="#" style={{ backgroundImage: `url(${img})` }}>
-      <span className="staged">연출 이미지</span>
+// to = 누르면 갈 곳 · burned = 사진 파일에 '연출 이미지' 글씨가 이미 들어 있음(AGC 연출컷)
+function Hero({ img, en, ko, to, burned }) {
+  const body = (
+    <>
+      {!burned && <span className="staged">연출 이미지</span>}
       <div className="hero-text">
         <strong>{en}</strong>
         <span>{ko}</span>
       </div>
+    </>
+  )
+  return to ? (
+    <Link className="hero" to={to} style={{ backgroundImage: `url(${img})` }}>
+      {body}
+    </Link>
+  ) : (
+    <a className="hero" href="#" style={{ backgroundImage: `url(${img})` }}>
+      {body}
     </a>
   )
 }
+// 맨 위 히어로 = 차지(CHAGEE) (2026-11-25 사용자) — 사진은 그 상품의 AGC 대표이미지(연출컷)
+const CHAGEE_HERO_IMG = 'https://api.eidofood.com/files/photos/2026/10/5672eb6c3fb14b9db64e8526c13c73b4.jpg'
 
 // 첫 화면 목록(mock.js)은 시안이라 상품 코드가 고정. 지금 자사몰에서 파는 상품(마켓 등록 + 삭제 안 됨)만 남기고,
 // 사진은 AGC 에 저장된 지금 값으로 덮는다 (대표이미지 = 연출 · 전환용 = 마우스 올리면). 가격·할인율은 아직 시안 값.
@@ -166,8 +178,14 @@ export default function App({ Header, Footer }) {
 
       <main className="board">
         <div className="col col-hero">
-          <Hero img="/img/soda.jpg" en="ARCTIC OCEAN" ko="북빙양 · 1936년부터 베이징의 귤맛 사이다" />
-          <Hero img="/img/lychee.jpg" en="LYCHEE SEASON" ko="리치 · 광둥에서 온 여름의 맛" />
+          <Hero
+            img={(chagee.find((p) => p.code === TEA_HERO) || chagee[0])?.img || CHAGEE_HERO_IMG}
+            en="CHAGEE"
+            ko="차지 · 매장 원엽차를 집에서 티백으로"
+            to={`/products?q=${encodeURIComponent('차지')}&cat=tea`}
+            burned
+          />
+          <Hero img="/img/soda.jpg" en="ARCTIC OCEAN" ko="북빙양 · 1936년부터 베이징의 귤맛 사이다" to="/products/PR-261020-0007" />
         </div>
         <div className="col">
           <Story img="/img/tea.jpg" title="무가당 차, 처음이라면" sub="단맛 없이 향만 남긴 중국 편의점 차예요." items={live.tea} />
@@ -184,7 +202,7 @@ export default function App({ Header, Footer }) {
       <section className="best">
         <div className="best-head">
           <h2>지금 많이 담는 음료</h2>
-          <span className="best-note">사진에 마우스를 올리면 실제 상품 사진 · 할인율은 쿠팡 판매가 대비</span>
+          <span className="best-note">사진에 마우스를 올리면 실제 상품 사진</span>
           <Link to="/products">전체보기</Link>
         </div>
         <div className="best-grid">
