@@ -7,7 +7,7 @@ import { useFreightOn } from './lib/freight'
 import QuickAdd from './components/QuickAdd'
 import { Link } from './lib/router'
 
-const won = (n) => `원` // 메인도 '원' 붙임 (2026-11-27)
+const won = (n) => `${Number(n || 0).toLocaleString('ko-KR')}원` // 메인도 '원' 붙임 (2026-11-27)
 
 function Heart() {
   return (
