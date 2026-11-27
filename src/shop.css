@@ -382,3 +382,19 @@ input[type='checkbox'] { accent-color: #000; }
   .fcart-btn { width: 48px; padding: 0; justify-content: center; }
   .fcart-sum { display: none; }
 }
+
+/* 해외 배송비 (예상) (2026-11-27) — components/Freight.jsx */
+.fr-q { position: relative; border-bottom: 1px dotted #aaa; cursor: help; }
+.fr-tip { display: none; position: absolute; left: 0; bottom: 22px; white-space: nowrap; background: var(--ink); color: #fff; font-size: 12px; padding: 6px 10px; z-index: 5; }
+.fr-q:hover .fr-tip, .fr-q:focus .fr-tip { display: block; }
+.fr-ship { background: #f6f5f2; padding: 10px 12px; margin: 10px 0 12px; font-size: 12px; color: var(--sub); }
+.fr-ship b { color: var(--ink); }
+.fr-track { display: flex; height: 4px; margin: 8px 0 4px; background: #e2e0da; }
+.fr-seg { flex: 1; position: relative; }
+.fr-seg + .fr-seg { border-left: 2px solid #f6f5f2; }
+.fr-seg i { position: absolute; left: 0; top: 0; bottom: 0; background: var(--ink); }
+.fr-lbl { display: flex; font-size: 10.5px; color: #999; }
+.fr-lbl span { flex: 1; }
+.fr-avg { margin-top: 6px; }
+.fr-avg span { color: #999; }
+.fcart-row.small { font-size: 11.5px; color: #999; margin-top: -2px; }

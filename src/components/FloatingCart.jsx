@@ -6,7 +6,9 @@ import { useEffect, useRef, useState } from 'react'
 
 import { useMember, won } from '../lib/api'
 import { setBuyNow, useCart } from '../lib/cart'
+import { useFreight } from '../lib/freight'
 import { Link, navigate } from '../lib/router'
+import { FreightRow } from './Freight'
 
 const HIDE = [/^\/cart/, /^\/order/, /^\/pay/, /^\/login/, /^\/signup/]
 const mobile = () => window.matchMedia('(max-width: 720px)').matches
@@ -30,6 +32,7 @@ export default function FloatingCart({ path }) {
   const count = items.reduce((n, i) => n + (i.qty || 0), 0)
   const total = items.reduce((n, i) => n + (i.price || 0) * (i.qty || 0), 0)
   const prev = useRef(count)
+  const f = useFreight(items) // 해외 배송비 (예상) — 서버 스위치 켜졌을 때만
 
   // 담으면 톡 튀고 안내 1.5초 (다른 탭에서 담아도)
   useEffect(() => {
@@ -98,13 +101,27 @@ export default function FloatingCart({ path }) {
               <span>상품 {count}개</span>
               <span>{won(total)}</span>
             </div>
-            <div className="fcart-row">
-              <span>배송비</span>
-              <span>무료</span>
-            </div>
+            {f.on ? (
+              <>
+                <div className="fcart-row">
+                  <FreightRow f={f} />
+                </div>
+                {f.data && (
+                  <div className="fcart-row small">
+                    <span>평균 배송비</span>
+                    <span>{won(f.data.avg)} / 개</span>
+                  </div>
+                )}
+              </>
+            ) : (
+              <div className="fcart-row">
+                <span>배송비</span>
+                <span>무료</span>
+              </div>
+            )}
             <div className="fcart-total">
               <span>합계</span>
-              <span>{won(total)}</span>
+              <span>{won(total + (f.on && f.data ? f.data.fee : 0))}</span>
             </div>
             <button className="btn-black fcart-order" onClick={order}>
               주문하기

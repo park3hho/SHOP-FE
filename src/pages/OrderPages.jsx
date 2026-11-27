@@ -4,6 +4,8 @@ import { Agreements, emptyAgree, requiredOk } from '../components/Agreements'
 import { Page } from '../components/Layout'
 import { getProfile, kst, listAddresses, myOrder, PAY_METHOD, PROGRESS, useMember, won } from '../lib/api'
 import { clearCart, getBuyNow, removeFromCart, setBuyNow, setQty, useCart } from '../lib/cart'
+import { FreightBar, FreightLabel } from '../components/Freight'
+import { useFreight } from '../lib/freight'
 import { createOrder, getMyCard, getOrder, getPayConfig, payWithCard, payWithKakao, payWithNaver, payWithSavedCard } from '../lib/payments'
 import { track } from '../lib/track'
 import { Link, navigate } from '../lib/router'
@@ -19,6 +21,7 @@ export function CartPage() {
   const [picked, setPicked] = useState(() => new Set(items.map((i) => i.sku)))
   useEffect(() => setPicked((s) => new Set([...s].filter((k) => items.some((i) => i.sku === k)))), [items])
   const chosen = items.filter((i) => picked.has(i.sku))
+  const f = useFreight(chosen) // 해외 배송비 (예상) — 서버 스위치 켜졌을 때만
   const all = items.length > 0 && chosen.length === items.length
   const toggle = (sku) =>
     setPicked((s) => {
@@ -81,12 +84,24 @@ export function CartPage() {
             <dl>
               <dt>상품 금액</dt>
               <dd>{won(sum(chosen))}</dd>
-              <dt>배송비</dt>
-              <dd>무료</dd>
+              {f.on ? (
+                <>
+                  <dt>
+                    <FreightLabel f={f} />
+                  </dt>
+                  <dd>{f.data ? won(f.data.fee) : f.loading ? '계산 중' : '-'}</dd>
+                </>
+              ) : (
+                <>
+                  <dt>배송비</dt>
+                  <dd>무료</dd>
+                </>
+              )}
             </dl>
+            {f.on && <FreightBar data={f.data} />}
             <div className="summary-total">
               <span>합계</span>
-              <b>{won(sum(chosen))}</b>
+              <b>{won(sum(chosen) + (f.on && f.data ? f.data.fee : 0))}</b>
             </div>
             <button className="btn-black" disabled={!chosen.length} onClick={order}>
               {chosen.length}개 주문하기
