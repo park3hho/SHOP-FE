@@ -68,9 +68,12 @@ export async function refreshCart() {
       body: JSON.stringify({ skus: items.map((i) => i.sku) }),
     })
     if (!res.ok) return
-    const { prices } = await res.json()
-    const next = items.filter((i) => prices[i.sku] != null).map((i) => ({ ...i, price: prices[i.sku] }))
-    if (next.length !== items.length || next.some((i, k) => i.price !== items[k].price)) write(next)
+    const { prices, names = {} } = await res.json()
+    // 이름 · 옵션도 서버 값으로 (중국어 · 포장 무게 · 상자 크기 뺀 표시명, 2026-11-27)
+    const next = items
+      .filter((i) => prices[i.sku] != null)
+      .map((i) => ({ ...i, price: prices[i.sku], ...(names[i.sku] || {}) }))
+    if (JSON.stringify(next) !== JSON.stringify(items)) write(next)
   } catch {
     /* 오프라인이면 그대로 */
   }

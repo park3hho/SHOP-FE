@@ -28,7 +28,7 @@ async function fetchFreight(items) {
     body: JSON.stringify({ items: items.map((i) => ({ sku: i.sku, qty: i.qty })) }),
   })
   if (!res.ok) throw new Error('배송비를 계산하지 못했어요')
-  return res.json() // { fee, weight_g, units, avg, boxes:[{weight_g, billable_kg, fee}] }
+  return res.json() // { fee, units, avg, score } — 무게 · 상자는 서버가 안 보냄
 }
 
 /** items: 장바구니 줄 → { on, loading, data } (꺼져 있으면 on=false) */
@@ -57,7 +57,6 @@ export function useFreight(items) {
   return { on, ...state }
 }
 
-export const kgText = (g) => `${(g / 1000).toFixed(1)}kg`
 
 /** 배송비 별도 모드인지 (서버 스위치 또는 직원 미리보기) — 문구 바꾸기용 */
 export function useFreightOn() {
