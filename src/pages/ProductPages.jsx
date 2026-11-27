@@ -4,6 +4,7 @@ import { Page } from '../components/Layout'
 import { getProduct, listProducts, useCategories, useMember, won } from '../lib/api'
 import { addToCart, setBuyNow } from '../lib/cart'
 import { useFreightOn } from '../lib/freight'
+import QuickAdd from '../components/QuickAdd'
 import { track } from '../lib/track'
 import { setMeta } from '../lib/meta'
 import { Link, navigate } from '../lib/router'
@@ -92,7 +93,10 @@ export function ProductListPage({ query }) {
             <div className="brand">{p.brand}</div>
             <div className="name">{p.name}</div>
             <div className="cn">{p.name_cn}</div>
-            <div className="price">{p.price ? `${won(p.price)}~` : '-'}</div>
+            <div className="pr">
+              <div className="price">{p.price ? `${won(p.price)}~` : '-'}</div>
+              {p.price ? <QuickAdd code={p.code} /> : null}
+            </div>
           </Link>
         ))}
       </div>

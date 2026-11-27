@@ -4,13 +4,14 @@ import { useEffect, useState } from 'react'
 import data from './data/mock.js'
 import { listProducts } from './lib/api'
 import { useFreightOn } from './lib/freight'
+import QuickAdd from './components/QuickAdd'
 import { Link } from './lib/router'
 
 const won = (n) => n.toLocaleString('ko-KR')
 
 function Heart() {
   return (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden="true">
+    <svg width="20" height="20" viewBox="2 2 20 20" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden="true">
       <path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z" />
     </svg>
   )
@@ -27,7 +28,10 @@ function Row({ p }) {
         <div className="price">{won(p.price)}</div>
         <div className="tags">{!sep && <span>무료배송</span>}<span>해외직배송</span></div>
       </div>
-      <button className="like" aria-label="찜" onClick={(e) => e.preventDefault()}><Heart /></button>
+      <div className="row-side">
+        <button className="like" aria-label="찜" onClick={(e) => e.preventDefault()}><Heart /></button>
+        <QuickAdd code={p.code} />
+      </div>
     </Link>
   )
 }
@@ -219,7 +223,10 @@ export default function App({ Header, Footer }) {
               <div className="brand">{p.brand}</div>
               <div className="name">{p.name}</div>
               <div className="cn">{p.cn}</div>
-              <div className="price">{won(p.price)}</div>
+              <div className="pr">
+                <div className="price">{won(p.price)}</div>
+                <QuickAdd code={p.code} />
+              </div>
             </Link>
             )
           })}
